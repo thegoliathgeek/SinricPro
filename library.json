@@ -15,7 +15,7 @@
   ],
   "version": "1.0.2.1",
   "frameworks": "arduino",
-  "platforms": "*",
+  "platforms": "Espressif 8266",
   "examples":[
     "[Ee]xamples/*/*/src/*.cpp"
   ]
