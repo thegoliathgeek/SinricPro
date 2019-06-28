@@ -2,19 +2,21 @@
   "name": "SinricPro",
   "keywords": "ethernet, sinric, alexa, iot",
   "description": "A c++ sdk for SinricPro.com",
-  "repository":
-  {
+  "repository": {
     "type": "git",
     "url": "https://github.com/sinricpro/SinricPro"
   },
-  "authors":
-  [
+  "authors": [
     {
       "name": "sivar2311",
       "email": "sivar2311@gmail.com",
       "maintainer": true
-    }],
-  "version": "1.0.2",
+    }
+  ],
+  "version": "1.0.2.1",
   "frameworks": "arduino",
-  "platforms": "*"
+  "platforms": "*",
+  "examples":[
+    "[Ee]xamples/*/*/src/*.cpp"
+  ]
 }
