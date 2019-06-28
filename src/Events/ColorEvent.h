@@ -36,8 +36,8 @@ String ColorEvent::getJsonEventString() {
   JsonObject event_0_values_0 = event_0_values.createNestedObject();
   event_0_values_0[JSON_EVENT_VALUE_NAME] = JSON_EVENT_VALUE_COLOR;
   event_0_values_0[JSON_EVENT_VALUE_R] = _state.r;
-  event_0_values_0[JSON_EVENT_VALUE_R] = _state.g;
-  event_0_values_0[JSON_EVENT_VALUE_R] = _state.b;
+  event_0_values_0[JSON_EVENT_VALUE_G] = _state.g;
+  event_0_values_0[JSON_EVENT_VALUE_B] = _state.b;
 
   String tmpString;
   serializeJson(doc, tmpString);
