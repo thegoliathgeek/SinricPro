@@ -24,7 +24,7 @@ class SinricPro {
     void begin(const String& api_key);
 
     void handle();
-    void handleCommand();
+    void handleRequest();
     void handleResponse();
 
     void stop();
@@ -52,7 +52,7 @@ class SinricPro {
   private:
     const char* _api_key;
 
-    wsRequestListener _wsCommandListener;
+    websocketListener _websocketListener;
     std::vector<SinricProDevice*> devices;
     unsigned long _baseTS;
 };
@@ -78,7 +78,7 @@ void SinricPro::begin(const char* api_key) {
   for (auto& device : devices) {
     deviceIds += String(device->getDeviceId()) + ";";
   }
-  _wsCommandListener.begin(api_key, deviceIds.c_str());
+  _websocketListener.begin(api_key, deviceIds.c_str());
 }
 
 void SinricPro::begin(const String& api_key) {
@@ -86,95 +86,78 @@ void SinricPro::begin(const String& api_key) {
 }
 
 void SinricPro::handle() {
-  _wsCommandListener.handle();
-  handleCommand();
+  _websocketListener.handle();
+  handleRequest();
 }
 
-void SinricPro::handleCommand() {
+void SinricPro::handleRequest() {
   if (requestQueue.count() > 0) {
-    DEBUG_SINRIC("[SinricPro.handleCommand()]: %i commands in queue\r\n", commandQueue.count());
-    // POP commands and call device.handle() for each related device
+    DEBUG_SINRIC("[SinricPro.handleRequest()]: %i requests in queue\r\n", requestQueue.count());
+    // POP requests and call device.handle() for each related device
     while (requestQueue.count() > 0) {
-      SinricProRequestPayload* request = requestQueue.pop();
-      DynamicJsonDocument doc(512);
-      DeserializationError err = deserializeJson(doc, request->getRequest());
+      SinricProRequestPayload* requestPayload = requestQueue.pop();
+
+      // decode jsonRequest
+      DynamicJsonDocument jsonRequestDoc(512);
+      DeserializationError err = deserializeJson(jsonRequestDoc, requestPayload->getRequest());
 
       if (err) {
-        DEBUG_SINRIC("[SinricPro.handleCommand()]: Error (%s) while parsing json command\r\n", err.c_str());
-        break;
+        DEBUG_SINRIC("[SinricPro.handleRequest()]: Error (%s) while parsing json request\r\n", err.c_str());
+        return;
       }
 
-      if (doc.containsKey(JSON_DEVICEID) && doc.containsKey(JSON_ACTIONS)) {
-        if (doc.containsKey(JSON_TIMESTAMP)) {
-          unsigned long ts = doc[JSON_TIMESTAMP];
+      JsonObject jsonRequest = jsonRequestDoc.as<JsonObject>();
+
+      if (jsonRequest.containsKey("did") && jsonRequest.containsKey(JSON_ACTIONS)) {
+        if (jsonRequest.containsKey("ts")) {
+          unsigned long ts = jsonRequest["ts"];
           setBaseTS(ts);
         }
 
-        const char* deviceId = doc[JSON_DEVICEID];
-        JsonArray actions = doc[JSON_ACTIONS].as<JsonArray>();
-
-        DynamicJsonDocument response(512);
-
-        // pre-build json response structure
-        response[JSON_SUCCESS] = true;
-        response[JSON_DEVICEID] = deviceId;
-        response[JSON_TIMESTAMP] = getTS();
-        response[JSON_RESPONSE_TYPE] = JSON_ACTION_RESPONSE;
-        JsonArray actionResults = response.createNestedArray(JSON_RESPONSE_RESULTS);
-        // end of pre-build
-
         for (auto& device : devices) {
-          if (strcmp(device->getDeviceId(), deviceId) == 0) {
-            for (JsonObject action : actions) {
+          if (strcmp(device->getDeviceId(), jsonRequest["did"]) == 0) {
+              DynamicJsonDocument jsonResponseDoc(512);
+              JsonObject jsonResponse = jsonResponseDoc.as<JsonObject>();
 
-              JsonObject actionResult = actionResults.createNestedObject();
-              actionResult[JSON_ACTION] = action[JSON_ACTION_NAME];
-              SinricProCommand jsonCommand(deviceId, action, actionResult);
-              DEBUG_SINRIC("[SinricPro.handleCommand()]: Found corresponding device...calling device.handle() routine\r\n");
-              // pre-build device response structure
-              actionResult[JSON_MESSAGE] = JSON_MESSAGE_OK;
-              actionResult[JSON_SUCCESS] = false;
-              actionResult.createNestedObject(JSON_DEVICE);
-              // pre-build device response structure
-              device->handle(jsonCommand);
+              // pre-build json response structure
+              jsonResponse["payloadVersion"] = 1;
+              jsonResponse["success"] = false;
+              jsonResponse["message"] = "OK";
+              jsonResponse["ts"] = getTS();
+              jsonResponse["did"] = jsonRequest["did"];
+              jsonResponse["type"] = "response";
+              jsonResponse["action"] = jsonRequest["action"];
+              jsonResponse["value"] = jsonRequest["value"];
+              // end of pre-build
 
-              if (jsonCommand.getSuccess()) {
-                actionResult[JSON_MESSAGE] = JSON_MESSAGE_OK;
-                actionResult[JSON_SUCCESS] = true;
-              } else {
-                DEBUG_SINRIC("[SinricPro.handleCommand()]: device.handle() returned: %s\r\n\r\n", jsonCommand.getSuccess()?"true":"false");
-                actionResult[JSON_MESSAGE] = JSON_MESSAGE_OK;
-                actionResult[JSON_SUCCESS] = false;
+              device->handle(jsonRequest, jsonResponse);
+
+              if (jsonResponse["success"]) {
+                String responseString;
+                serializeJsonPretty(jsonResponse, responseString);
+
+                switch (requestPayload->getRequestSource()) {
+                  case CS_WEBSOCKET:
+                    _websocketListener.sendResponse(responseString);
+                    break;
+                  default:
+                    break;
+                }
               }
-            }
           }
         }
-
-        String responseString;
-        serializeJsonPretty(response, responseString);
-
-        switch (request->getRequestSource()) {
-          case CS_WEBSOCKET:
-            _wsCommandListener.sendResponse(responseString);
-            break;
-          default:
-            break;
-        }
-        DEBUG_SINRIC("\r\n");
-      } else {
-        DEBUG_SINRIC("[SinricPro.handleCommand()]: Error! command doesn't contain deviceId and/or action\r\n");
       }
-      delete request;
+      delete requestPayload;
     }
   }
 }
 
 void SinricPro::stop() {
-  _wsCommandListener.stop();
+  _websocketListener.stop();
 }
 
 bool SinricPro::isConnected() {
-  return _wsCommandListener.isConnected();
+  return _websocketListener.isConnected();
 };
 
 template <typename DeviceType>
@@ -214,7 +197,7 @@ void SinricPro::raiseEvent(SinricProEvent& event) {
   event.setTS(getTS());
   String tmpString = event.getJsonEventString();
   DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
-  _wsCommandListener.sendEvent(tmpString);
+  _websocketListener.sendEvent(tmpString);
 }
 
 SinricProDevice* SinricPro::operator[] (const char* deviceId) {

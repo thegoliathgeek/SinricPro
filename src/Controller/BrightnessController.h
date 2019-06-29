@@ -17,7 +17,7 @@ public:
   typedef std::function<bool(const char*, brightnessState)> BrightnessLevelCallback;
   void onSetBrightness(BrightnessLevelCallback callback) { _brightnessLevelCb = callback; }
   void onAdjustBrightness(BrightnessLevelCallback callback) { _brightnessAdjustCb = callback; }
-  void handleBrightnessController(SinricProCommand& cmd);
+  void handleBrightnessController(JsonObject& jsonRequest, JsonObject& jsonResponse);
 
   void setBrightnessState(brightnessState& state) { _brightnessState = state; }
   brightnessState getBrightnessState() { return _brightnessState; }
@@ -28,7 +28,8 @@ private:
   brightnessState _brightnessState;
 };
 
-void BrightnessController::handleBrightnessController(SinricProCommand& cmd) {
+void BrightnessController::handleBrightnessController(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+/*
   if (cmd.isHandled()) return;
   DEBUG_SINRIC("handleBrightnessController()\r\n");
 
@@ -51,6 +52,7 @@ void BrightnessController::handleBrightnessController(SinricProCommand& cmd) {
 
   if (cmd.getSuccess()) _brightnessState = tmpState;
   if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_BRIGHTNESS] = _brightnessState.brightness;
+  */
 }
 
 #endif

@@ -17,7 +17,7 @@ public:
   typedef std::function<bool(const char*, powerLevelState state)> PowerLevelCallback;
   void onPowerLevel(PowerLevelCallback callback) { _powerLevelCb = callback; }
   void onAdjustPowerLevel(PowerLevelCallback callback) { _powerLevelAdjustCb = callback; }
-  void handlePowerLevelController(SinricProCommand& cmd);
+  void handlePowerLevelController(JsonObject& jsonRequest, JsonObject& jsonResponse);
 
   void setPowerLevelState(powerLevelState& state) { _powerLevelState = state; }
   powerLevelState getPowerLevelState() { return _powerLevelState; }
@@ -28,8 +28,8 @@ private:
   powerLevelState _powerLevelState;
 };
 
-void PowerLevelController::handlePowerLevelController(SinricProCommand& cmd) {
-  if (cmd.isHandled()) return;
+void PowerLevelController::handlePowerLevelController(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+/*  if (cmd.isHandled()) return;
   DEBUG_SINRIC("handlePowerLevelController()\r\n");
 
   powerLevelState tmpState = _powerLevelState;
@@ -51,6 +51,7 @@ void PowerLevelController::handlePowerLevelController(SinricProCommand& cmd) {
 
   if (cmd.getSuccess()) _powerLevelState = tmpState;
   if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_POWERLEVEL] = _powerLevelState.powerLevel;
+  */
 }
 
 #endif

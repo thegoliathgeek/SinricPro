@@ -1,12 +1,6 @@
-/*
- * (c) 2019 Sinric
- * License: MIT License.
- * Author: Aruna Tennakoon
- *
- * receive app commands via webocket protocal
- */
-#ifndef _SINRICPRO_WSCL_H__
-#define _SINRICPRO_WSCL_H__
+
+#ifndef _SINRICPRO_WEBSOCKET_H__
+#define _SINRICPRO_WEBSOCKET_H__
 
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>
@@ -15,14 +9,14 @@
 #include "Request/SinricProRequest.h"
 #include "Communication/SinricProQueue.h"
 
-class wsRequestListener
+class websocketListener
 {
   public:
     typedef std::function<void(void)> wsConnectedCallback;
     typedef std::function<void(void)> wsDisconnectedCallback;
 
-    wsRequestListener();
-    ~wsRequestListener();
+    websocketListener();
+    ~websocketListener();
 
     void begin(String apikey, String deviceIds);
     void handle();
@@ -45,13 +39,13 @@ class wsRequestListener
     void webSocketEvent(WStype_t type, uint8_t * payload, size_t length);
 };
 
-wsRequestListener::wsRequestListener() : _isConnected(false) {}
+websocketListener::websocketListener() : _isConnected(false) {}
 
-wsRequestListener::~wsRequestListener() {
+websocketListener::~websocketListener() {
   stop();
 }
 
-void wsRequestListener::begin(String apikey, String deviceIds) {
+void websocketListener::begin(String apikey, String deviceIds) {
 
     DEBUG_SINRIC("[SinricPro:Websocket]: Conecting to WebSocket Server\r\n");
 
@@ -72,23 +66,23 @@ void wsRequestListener::begin(String apikey, String deviceIds) {
 
 }
 
-void wsRequestListener::handle() {
+void websocketListener::handle() {
   webSocket.loop();
 }
 
-void wsRequestListener::stop() {
+void websocketListener::stop() {
   if (_isConnected) {
     webSocket.disconnect();
     _isConnected = false;
   }
 }
 
-void wsRequestListener::sendResponse(String& response) {
+void websocketListener::sendResponse(String& response) {
   webSocket.sendTXT(response);
 }
 
 
-void wsRequestListener::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
+void websocketListener::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 {
   switch (type) {
     case WStype_DISCONNECTED:

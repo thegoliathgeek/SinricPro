@@ -11,7 +11,7 @@ class SinricProDimSwitch : public SinricProDevice,
                            public PowerLevelController {
   public:
     SinricProDimSwitch(const char* deviceId );
-    bool handle(SinricProCommand& cmd) override;
+    bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse) override;
   private:
 };
 
@@ -21,13 +21,11 @@ SinricProDimSwitch::SinricProDimSwitch(const char* deviceId ) :
   PowerLevelController() {
 }
 
-bool SinricProDimSwitch::handle(SinricProCommand& cmd) {
-  DEBUG_SINRIC("[SinricProDimSwitch:handle] deviceId=%s, action=%s\r\n", cmd.getDeviceId(), cmd.getActionName());
+bool SinricProDimSwitch::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+  handlePowerController(jsonRequest, jsonResponse);
+  handlePowerLevelController(jsonRequest, jsonResponse);
 
-  handlePowerController(cmd);
-  handlePowerLevelController(cmd);
-
-  return cmd.getSuccess();
+  return jsonResponse["success"];
 }
 
 #endif

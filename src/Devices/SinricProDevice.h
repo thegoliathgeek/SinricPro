@@ -8,7 +8,7 @@ class SinricProDevice {
   public:
     SinricProDevice(const char* deviceId, const char* deviceName);
     virtual ~SinricProDevice();
-    virtual bool handle(SinricProCommand& cmd) { return false; }
+    virtual bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse) { return false; }
     const char* getDeviceId() { return _deviceId; }
     const char* getDeviceName() { return _deviceName; }
   protected:

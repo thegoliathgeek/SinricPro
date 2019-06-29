@@ -9,7 +9,7 @@ class SinricProSwitch : public SinricProDevice,
                         public PowerController {
   public:
     SinricProSwitch(const char* deviceId );
-    bool handle(SinricProCommand& cmd) override;
+    bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse) override;
 };
 
 SinricProSwitch::SinricProSwitch(const char* deviceId ) :
@@ -17,12 +17,9 @@ SinricProSwitch::SinricProSwitch(const char* deviceId ) :
   PowerController() {
 }
 
-bool SinricProSwitch::handle(SinricProCommand& cmd) {
-  DEBUG_SINRIC("[SinricProSwitch:handle] deviceId=%s, action=%s\r\n", cmd.getDeviceId(), cmd.getActionName());
-
-  handlePowerController(cmd);
-
-  return cmd.getSuccess();
+bool SinricProSwitch::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+  handlePowerController(jsonRequest, jsonResponse);
+  return jsonResponse["success"];
 }
 
 #endif

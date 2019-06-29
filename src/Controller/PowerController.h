@@ -19,7 +19,7 @@ public:
   PowerController() : _powerStateCb(nullptr) {};
   typedef std::function<bool(const char*, powerState& state)> PowerStateCallback;
   void onPowerState(PowerStateCallback callback) { _powerStateCb = callback; }
-  void handlePowerController(SinricProCommand& cmd);
+  void handlePowerController(JsonObject& jsonRequest, JsonObject& jsonResponse);
 
   void setPowerState(powerState& state) { _powerState = state; }
   powerState getPowerState() { return _powerState; }
@@ -32,7 +32,8 @@ private:
 // To do: deliver SinricProResponse object
 // fill response object
 
-void PowerController::handlePowerController(SinricProCommand& cmd) {
+void PowerController::handlePowerController(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+/*
   if (cmd.isHandled()) return;
   DEBUG_SINRIC("handlePowerController()\r\n");
   powerState tmpState = _powerState;
@@ -51,6 +52,7 @@ void PowerController::handlePowerController(SinricProCommand& cmd) {
 
   if (cmd.getSuccess()) _powerState = tmpState;
   if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_POWERSTATE] = _powerState.state?"On":"Off";
+  */
 }
 
 #endif

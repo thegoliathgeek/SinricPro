@@ -15,7 +15,7 @@ class SinricProLight : public SinricProDevice,
                        public ColorTemperatureController {
   public:
 	  SinricProLight(const char* deviceId);
-    bool handle(SinricProCommand& cmd) override;
+    bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse) override;
   private:
 };
 
@@ -27,15 +27,15 @@ SinricProLight::SinricProLight(const char* deviceId ) :
   ColorTemperatureController() {
 }
 
-bool SinricProLight::handle(SinricProCommand& cmd) {
+bool SinricProLight::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
   DEBUG_SINRIC("[SinricProDimSwitch:handle] deviceId=%s, action=%s\r\n", cmd.getDeviceId(), cmd.getActionName());
 
-  handlePowerController(cmd);
-  handleBrightnessController(cmd);
-  handleColorController(cmd);
-  handleColorTemperatureController(cmd);
+  handlePowerController(jsonRequest, jsonResponse);
+  handleBrightnessController(jsonRequest, jsonResponse);
+  handleColorController(jsonRequest, jsonResponse);
+  handleColorTemperatureController(jsonRequest, jsonResponse);
 
-  return cmd.getSuccess();
+  return jsonResponse["success"];
 }
 
 #endif

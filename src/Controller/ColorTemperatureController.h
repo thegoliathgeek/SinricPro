@@ -24,7 +24,7 @@ public:
   void onIncreaseColorTemperature(ColorTemperatureCallback callback) { _incColorTempCb = callback; }
   void onDecreaseColorTemperature(ColorTemperatureCallback callback) { _decColorTempCb = callback; }
 
-  void handleColorTemperatureController(SinricProCommand& cmd);
+  void handleColorTemperatureController(JsonObject& jsonRequest, JsonObject& jsonResponse);
 
   void setColorTemperatureState(colorTemperatureState& state) { _colorTemperatureState = state; }
   colorTemperatureState getColorTemperatureState() { return _colorTemperatureState; }
@@ -36,7 +36,8 @@ private:
   colorTemperatureState _colorTemperatureState;
 };
 
-void ColorTemperatureController::handleColorTemperatureController(SinricProCommand& cmd) {
+void ColorTemperatureController::handleColorTemperatureController(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+/*
   if (cmd.isHandled()) return;
   colorTemperatureState tmpState = _colorTemperatureState;
 
@@ -58,6 +59,7 @@ void ColorTemperatureController::handleColorTemperatureController(SinricProComma
 
   if (cmd.getSuccess()) _colorTemperatureState = tmpState;
   if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_COLORTEMPERATURE] = _colorTemperatureState.colorTemperature;
+  */
 }
 
 #endif
