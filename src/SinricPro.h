@@ -52,7 +52,7 @@ class SinricPro {
   private:
     const char* _api_key;
 
-    wsCommandListener _wsCommandListener;
+    wsRequestListener _wsCommandListener;
     std::vector<SinricProDevice*> devices;
     unsigned long _baseTS;
 };
@@ -91,13 +91,13 @@ void SinricPro::handle() {
 }
 
 void SinricPro::handleCommand() {
-  if (commandQueue.count() > 0) {
+  if (requestQueue.count() > 0) {
     DEBUG_SINRIC("[SinricPro.handleCommand()]: %i commands in queue\r\n", commandQueue.count());
     // POP commands and call device.handle() for each related device
-    while (commandQueue.count() > 0) {
-      SinricProReceiveCommand* cmd = commandQueue.pop();
+    while (requestQueue.count() > 0) {
+      SinricProRequestPayload* request = requestQueue.pop();
       DynamicJsonDocument doc(512);
-      DeserializationError err = deserializeJson(doc, cmd->getCommand());
+      DeserializationError err = deserializeJson(doc, request->getRequest());
 
       if (err) {
         DEBUG_SINRIC("[SinricPro.handleCommand()]: Error (%s) while parsing json command\r\n", err.c_str());
@@ -153,7 +153,7 @@ void SinricPro::handleCommand() {
         String responseString;
         serializeJsonPretty(response, responseString);
 
-        switch (cmd->getCommandSource()) {
+        switch (request->getRequestSource()) {
           case CS_WEBSOCKET:
             _wsCommandListener.sendResponse(responseString);
             break;
@@ -164,7 +164,7 @@ void SinricPro::handleCommand() {
       } else {
         DEBUG_SINRIC("[SinricPro.handleCommand()]: Error! command doesn't contain deviceId and/or action\r\n");
       }
-      delete cmd;
+      delete request;
     }
   }
 }

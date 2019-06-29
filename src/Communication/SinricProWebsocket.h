@@ -15,14 +15,14 @@
 #include "Command/SinricProCommand.h"
 #include "Command/SinricProQueue.h"
 
-class wsCommandListener
+class wsRequestListener
 {
   public:
     typedef std::function<void(void)> wsConnectedCallback;
     typedef std::function<void(void)> wsDisconnectedCallback;
 
-    wsCommandListener();
-    ~wsCommandListener();
+    wsRequestListener();
+    ~wsRequestListener();
 
     void begin(String apikey, String deviceIds);
     void handle();
@@ -45,13 +45,13 @@ class wsCommandListener
     void webSocketEvent(WStype_t type, uint8_t * payload, size_t length);
 };
 
-wsCommandListener::wsCommandListener() : _isConnected(false) {}
+wsRequestListener::wsRequestListener() : _isConnected(false) {}
 
-wsCommandListener::~wsCommandListener() {
+wsRequestListener::~wsRequestListener() {
   stop();
 }
 
-void wsCommandListener::begin(String apikey, String deviceIds) {
+void wsRequestListener::begin(String apikey, String deviceIds) {
 
     DEBUG_SINRIC("[SinricPro:Websocket]: Conecting to WebSocket Server\r\n");
 
@@ -72,23 +72,23 @@ void wsCommandListener::begin(String apikey, String deviceIds) {
 
 }
 
-void wsCommandListener::handle() {
+void wsRequestListener::handle() {
   webSocket.loop();
 }
 
-void wsCommandListener::stop() {
+void wsRequestListener::stop() {
   if (_isConnected) {
     webSocket.disconnect();
     _isConnected = false;
   }
 }
 
-void wsCommandListener::sendResponse(String& response) {
+void wsRequestListener::sendResponse(String& response) {
   webSocket.sendTXT(response);
 }
 
 
-void wsCommandListener::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
+void wsRequestListener::webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 {
   switch (type) {
     case WStype_DISCONNECTED:
@@ -102,9 +102,9 @@ void wsCommandListener::webSocketEvent(WStype_t type, uint8_t * payload, size_t 
       if (_wsConnectedCb) _wsConnectedCb();
       break;
     case WStype_TEXT: {
-      SinricProReceiveCommand* cmd = new SinricProReceiveCommand(CS_WEBSOCKET, (char*)payload);
-      DEBUG_SINRIC("[SinricPro:Websocket]: receiving command\r\n");
-      commandQueue.push(cmd);
+      SinricProRequestPayload* request = new SinricProRequestPayload(CS_WEBSOCKET, (char*)payload);
+      DEBUG_SINRIC("[SinricPro:Websocket]: receiving request\r\n");
+      requestQueue.push(request);
       break;
     }
     default: break;

@@ -37,16 +37,16 @@ class SinricProCommand {
     bool _handled;
 };
 
-class SinricProReceiveCommand {
+class SinricProRequestPayload {
 public:
-  SinricProReceiveCommand(sp_command_source_t source, char* command) : _source(source) { _command = strdup(command); };
-  ~SinricProReceiveCommand() { if (_command) free(_command); };
-  const char* getCommand() { return _command; };
-  const sp_command_source_t getCommandSource() { return _source; }
+  SinricProRequestPayload(sp_command_source_t source, char* request) : _source(source) { _request = strdup(request); };
+  ~SinricProRequestPayload() { if (_request) free(_request); };
+  const char* getRequest() { return _request; };
+  const sp_command_source_t getRequestSource() { return _source; }
   sp_command_source_t getSource() { return _source; };
 private:
   sp_command_source_t _source;
-  char* _command;
+  char* _request;
 };
 
 #endif

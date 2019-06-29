@@ -3,6 +3,6 @@
 
 #include <QueueList.h>
 
-QueueList<SinricProReceiveCommand*> commandQueue;
+QueueList<SinricProRequestPayload*> requestQueue;
 
 #endif
