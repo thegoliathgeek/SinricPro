@@ -2,7 +2,7 @@
 #define __POWERLEVELCONTROLLER_H__
 
 #include <ArduinoJson.h>
-#include "Command/SinricProCommand.h"
+#include "Request/SinricProRequest.h"
 
 struct powerLevelState {
   int powerLevel;

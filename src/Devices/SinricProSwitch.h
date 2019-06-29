@@ -2,7 +2,7 @@
 #define __SINRICPROSWITCH_H__
 
 #include "SinricProDevice.h"
-#include "Command/SinricProCommand.h"
+#include "Request/SinricProRequest.h"
 #include "Controller/PowerController.h"
 
 class SinricProSwitch : public SinricProDevice,

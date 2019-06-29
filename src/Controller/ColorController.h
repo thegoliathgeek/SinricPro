@@ -2,7 +2,7 @@
 #define __COLORCONTROLLER_H__
 
 #include <ArduinoJson.h>
-#include "Command/SinricProCommand.h"
+#include "Request/SinricProRequest.h"
 
 struct colorState {
   int r;

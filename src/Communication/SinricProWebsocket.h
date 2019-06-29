@@ -12,8 +12,8 @@
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include "SinricProConfig.h"
-#include "Command/SinricProCommand.h"
-#include "Command/SinricProQueue.h"
+#include "Request/SinricProRequest.h"
+#include "Communication/SinricProQueue.h"
 
 class wsRequestListener
 {

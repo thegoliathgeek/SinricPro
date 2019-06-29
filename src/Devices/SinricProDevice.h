@@ -2,7 +2,7 @@
 #define __SINRICPRODEVICE_H__
 
 #include <ArduinoJson.h>
-#include "Command/SinricProCommand.h"
+#include "Request/SinricProRequest.h"
 
 class SinricProDevice {
   public:

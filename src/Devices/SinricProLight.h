@@ -2,7 +2,7 @@
 #define __SINRICPROLIGHT_H__
 
 #include "SinricProDevice.h"
-#include "Command/SinricProCommand.h"
+#include "Request/SinricProRequest.h"
 #include "Controller/PowerController.h"
 #include "Controller/BrightnessController.h"
 #include "Controller/ColorController.h"

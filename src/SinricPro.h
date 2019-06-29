@@ -7,12 +7,12 @@
 #include <vector>
 
 #include <SinricProDebug.h>
-#include "Command/JsonCommands.h"
 #include <SinricProConfig.h>
 #include "Devices/SinricProDevice.h"
+#include "Communication/SinricProQueue.h"
 #include "Communication/SinricProWebsocket.h"
-#include "Command/SinricProCommand.h"
-#include "Command/SinricProQueue.h"
+#include "Request/SinricProRequest.h"
+#include "Request/JsonRequests.h"
 #include "Events/SinricProEvent.h"
 
 class SinricPro {
