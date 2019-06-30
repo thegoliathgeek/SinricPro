@@ -28,8 +28,6 @@ SinricProLight::SinricProLight(const char* deviceId ) :
 }
 
 bool SinricProLight::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-  DEBUG_SINRIC("[SinricProDimSwitch:handle] deviceId=%s, action=%s\r\n", cmd.getDeviceId(), cmd.getActionName());
-
   handlePowerController(jsonRequest, jsonResponse);
   handleBrightnessController(jsonRequest, jsonResponse);
   handleColorController(jsonRequest, jsonResponse);

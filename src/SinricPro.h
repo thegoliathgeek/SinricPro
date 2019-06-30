@@ -39,8 +39,8 @@ class SinricPro {
     boolean remove(const char* deviceId);
     boolean remove(const String& deviceId);
 
-    unsigned long getTS() { return _baseTS + (millis() / 1000); }
-    void setBaseTS(unsigned long ts) { _baseTS = ts-(millis()/1000); }
+    unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
+    void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
     void raiseEvent(SinricProEvent& event);
     SinricProDevice& operator[] (int index)  { return *devices[index]; }
@@ -90,6 +90,17 @@ void SinricPro::handle() {
   handleRequest();
 }
 
+void prepareResponse(const JsonObject& jsonRequest, JsonObject& jsonResponse, unsigned long ts) {
+  jsonResponse["payloadVersion"] = 1;
+  jsonResponse["success"] = false;
+  jsonResponse["message"] = "OK";
+  jsonResponse["ts"] = ts;
+  jsonResponse["did"] = jsonRequest["did"];
+  jsonResponse["type"] = "response";
+  jsonResponse["action"] = jsonRequest["action"];
+  jsonResponse["value"] = jsonRequest["value"];
+}
+
 void SinricPro::handleRequest() {
   if (requestQueue.count() > 0) {
     DEBUG_SINRIC("[SinricPro.handleRequest()]: %i requests in queue\r\n", requestQueue.count());
@@ -108,10 +119,9 @@ void SinricPro::handleRequest() {
 
       JsonObject jsonRequest = jsonRequestDoc.as<JsonObject>();
 
-      if (jsonRequest.containsKey("did") && jsonRequest.containsKey(JSON_ACTIONS)) {
+      if (jsonRequest.containsKey("did") && jsonRequest.containsKey("action")) {
         if (jsonRequest.containsKey("ts")) {
-          unsigned long ts = jsonRequest["ts"];
-          setBaseTS(ts);
+          syncTimestamp(jsonRequest["ts"].as<unsigned long int>());
         }
 
         for (auto& device : devices) {
@@ -119,17 +129,7 @@ void SinricPro::handleRequest() {
               DynamicJsonDocument jsonResponseDoc(512);
               JsonObject jsonResponse = jsonResponseDoc.as<JsonObject>();
 
-              // pre-build json response structure
-              jsonResponse["payloadVersion"] = 1;
-              jsonResponse["success"] = false;
-              jsonResponse["message"] = "OK";
-              jsonResponse["ts"] = getTS();
-              jsonResponse["did"] = jsonRequest["did"];
-              jsonResponse["type"] = "response";
-              jsonResponse["action"] = jsonRequest["action"];
-              jsonResponse["value"] = jsonRequest["value"];
-              // end of pre-build
-
+              prepareResponse(jsonRequest, jsonResponse, getTimestamp());
               device->handle(jsonRequest, jsonResponse);
 
               if (jsonResponse["success"]) {
@@ -194,7 +194,7 @@ boolean SinricPro::remove(const String& deviceId) {
 }
 
 void SinricPro::raiseEvent(SinricProEvent& event) {
-  event.setTS(getTS());
+  event.setTS(getTimestamp());
   String tmpString = event.getJsonEventString();
   DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
   _websocketListener.sendEvent(tmpString);
