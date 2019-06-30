@@ -30,11 +30,8 @@ class SinricPro {
     void stop();
     bool isConnected();
 
-    template <typename DeviceType>
-    DeviceType& add(const char* deviceId);
-
-    template <typename DeviceType>
-    DeviceType& add(const String& deviceId);
+    SinricProDevice& add(const char* deviceId);
+    SinricProDevice& add(const String& deviceId);
 
     boolean remove(const char* deviceId);
     boolean remove(const String& deviceId);
@@ -160,18 +157,17 @@ bool SinricPro::isConnected() {
   return _websocketListener.isConnected();
 };
 
-template <typename DeviceType>
-DeviceType& SinricPro::add(const char* deviceId) {
-  DeviceType* newDevice = new DeviceType(deviceId);
-  DEBUG_SINRIC("[SinricPro]: Add device %s (%s)\r\n", deviceId, newDevice->getDeviceName());
 
+SinricProDevice& SinricPro::add(const char* deviceId) {
+  DEBUG_SINRIC("[SinricPro]: Add device %s\r\n", deviceId);
+
+  SinricProDevice* newDevice = new SinricProDevice(deviceId);
   devices.push_back(newDevice);
   return *newDevice;
 }
 
-template <typename DeviceType>
-DeviceType& SinricPro::add(const String& deviceId) {
-  return add<DeviceType>(deviceId.c_str());
+SinricProDevice& SinricPro::add(const String& deviceId) {
+  return add(deviceId.c_str());
 }
 
 boolean SinricPro::remove(const char* deviceId) {

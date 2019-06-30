@@ -3,21 +3,45 @@
 
 #include <ArduinoJson.h>
 #include "Request/SinricProRequest.h"
+#include "Controller/ColorController.h"
+#include "Controller/ColorTemperatureController.h"
+#include "Controller/BrightnessController.h"
+#include "Controller/PowerController.h"
+#include "Controller/PowerLevelController.h"
 
-class SinricProDevice {
+class SinricProDevice : public PowerController,
+                        public PowerLevelController,
+                        public BrightnessController,
+                        public ColorController,
+                        public ColorTemperatureController{
   public:
-    SinricProDevice(const char* deviceId, const char* deviceName);
-    virtual ~SinricProDevice();
-    virtual bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse) { return false; }
+    SinricProDevice(const char* deviceId);
+    ~SinricProDevice();
+    bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
     const char* getDeviceId() { return _deviceId; }
-    const char* getDeviceName() { return _deviceName; }
   protected:
     char* _deviceId;
-    const char* _deviceName;
 };
 
-SinricProDevice::SinricProDevice(const char* deviceId, const char* deviceName) :
-  _deviceName(deviceName) {
+bool compare(const char* a, const char *b) {
+  return strcmp(a, b) == 0;
+}
+
+bool SinricProDevice::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+  const char* actionName = jsonRequest["action"];
+  if (compare(actionName, "setPowerState")) return PowerController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "setPowerLevel")) return PowerLevelController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "adjustPowerLevel")) return PowerLevelController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "setBrightness")) return BrightnessController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "adjustBrightness")) return BrightnessController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "setColor")) return ColorController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "setColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "increaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
+  if (compare(actionName, "decreaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
+  return false; // should only happen if no controller can handle it...
+}
+
+SinricProDevice::SinricProDevice(const char* deviceId) {
   _deviceId = strdup(deviceId);
 }
 
