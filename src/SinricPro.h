@@ -176,7 +176,7 @@ bool SinricPro::isConnected() {
 
 SinricProDevice& SinricPro::add(const char* deviceId) {
   SinricProDevice* newDevice = new SinricProDevice(deviceId);
-  DEBUG_SINRIC("[SinricPro]: Add device %s (%s)\r\n", deviceId, newDevice->getDeviceName());
+  DEBUG_SINRIC("[SinricPro]: Add device %s\r\n", deviceId);
 
   devices.push_back(newDevice);
   return *newDevice;
