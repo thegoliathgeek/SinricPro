@@ -21,7 +21,7 @@ public:
   ColorController() : _colorCb(nullptr) {}
   typedef std::function<bool(const char*, colorState)> ColorCallback;
   void onSetColor(ColorCallback callback) { _colorCb = callback; }
-  void handleColorController(SinricProCommand& cmd);
+  bool handle(SinricProCommand& cmd);
 
   void setColorState(colorState& state) { _colorState = state; }
   colorState getColorState() { return _colorState; }
@@ -31,8 +31,7 @@ private:
   colorState _colorState;
 };
 
-void ColorController::handleColorController(SinricProCommand& cmd){
-  if (cmd.isHandled()) return;
+bool ColorController::handle(SinricProCommand& cmd){
   colorState tmpState = _colorState;
 
   if (strcmp(cmd.getActionName(), JSON_CMD_SET_COLOR)==0 && _colorCb) {
@@ -51,6 +50,7 @@ void ColorController::handleColorController(SinricProCommand& cmd){
     response[JSON_DEVICE][JSON_RESULT_COLOR][JSON_RESULT_COLOR_G] = _colorState.g;
     response[JSON_DEVICE][JSON_RESULT_COLOR][JSON_RESULT_COLOR_B] = _colorState.b;
   }
+  return cmd.isHandled();
 }
 
 #endif

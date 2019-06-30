@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <SinricPro.h>
-#include <Devices/SinricProLight.h>
 
 #define SSID "YOUR WIFI-SSID HERE"
 #define PASS "YOUR WIFI-PASS HERE"
@@ -9,7 +8,7 @@
 #define LIGHT_ID "YOUR-LIGHT-DEVICE-ID-HERE"
 
 // Instantiate SinricProDimSwitch (dimmable Switch)
-SinricProLight myLight = SinricPro.add<SinricProLight>(LIGHT_ID);
+SinricProDevice myLight = SinricPro.add(LIGHT_ID);
 
 // Callback-Routine for on/off request
 bool onPowerState(const char* deviceId, powerState state) {

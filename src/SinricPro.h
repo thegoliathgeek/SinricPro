@@ -30,16 +30,13 @@ class SinricPro {
     void stop();
     bool isConnected();
 
-    template <typename DeviceType>
-    DeviceType& add(const char* deviceId);
-
-    template <typename DeviceType>
-    DeviceType& add(const String& deviceId);
+    SinricProDevice& add(const char* deviceId);
+    SinricProDevice& add(const String& deviceId);
 
     boolean remove(const char* deviceId);
     boolean remove(const String& deviceId);
 
-    unsigned long getTS() { return _baseTS + (millis() / 1000); }
+    unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
     void setBaseTS(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
     void raiseEvent(SinricProEvent& event);
@@ -118,7 +115,7 @@ void SinricPro::handleCommand() {
         // pre-build json response structure
         response[JSON_SUCCESS] = true;
         response[JSON_DEVICEID] = deviceId;
-        response[JSON_TIMESTAMP] = getTS();
+        response[JSON_TIMESTAMP] = getTimestamp();
         response[JSON_RESPONSE_TYPE] = JSON_ACTION_RESPONSE;
         JsonArray actionResults = response.createNestedArray(JSON_RESPONSE_RESULTS);
         // end of pre-build
@@ -177,18 +174,16 @@ bool SinricPro::isConnected() {
   return _wsCommandListener.isConnected();
 };
 
-template <typename DeviceType>
-DeviceType& SinricPro::add(const char* deviceId) {
-  DeviceType* newDevice = new DeviceType(deviceId);
-  DEBUG_SINRIC("[SinricPro]: Add device %s (%s)\r\n", deviceId, newDevice->getDeviceName());
+SinricProDevice& SinricPro::add(const char* deviceId) {
+  SinricProDevice* newDevice = new SinricProDevice(deviceId);
+  DEBUG_SINRIC("[SinricPro]: Add device %s\r\n", deviceId);
 
   devices.push_back(newDevice);
   return *newDevice;
 }
 
-template <typename DeviceType>
-DeviceType& SinricPro::add(const String& deviceId) {
-  return add<DeviceType>(deviceId.c_str());
+SinricProDevice& SinricPro::add(const String& deviceId) {
+  return add(deviceId.c_str());
 }
 
 boolean SinricPro::remove(const char* deviceId) {
@@ -211,7 +206,7 @@ boolean SinricPro::remove(const String& deviceId) {
 }
 
 void SinricPro::raiseEvent(SinricProEvent& event) {
-  event.setTS(getTS());
+  event.setTS(getTimestamp());
   String tmpString = event.getJsonEventString();
   DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
   _wsCommandListener.sendEvent(tmpString);
