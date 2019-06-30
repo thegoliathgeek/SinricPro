@@ -30,7 +30,7 @@ private:
 };
 
 bool PowerLevelController::handle(SinricProCommand& cmd) {
-  DEBUG_SINRIC("handlePowerLevelController()\r\n");
+  DEBUG_SINRIC("PowerLevelController::handle()\r\n");
 
   powerLevelState tmpState = _powerLevelState;
 

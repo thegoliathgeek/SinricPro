@@ -33,7 +33,7 @@ private:
 // fill response object
 
 bool PowerController::handle(SinricProCommand& cmd) {
-  DEBUG_SINRIC("handlePowerController()\r\n");
+  DEBUG_SINRIC("PowerController::handle()\r\n");
   powerState tmpState = _powerState;
 
   if (strcmp(cmd.getActionName(), JSON_CMD_OFF)==0 && _powerStateCb) {

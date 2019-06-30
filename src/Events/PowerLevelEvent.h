@@ -3,6 +3,7 @@
 
 #include "SinricProEvent.h"
 #include "Devices/SinricProDevice.h"
+#include "Controller/PowerLevelController.h"
 
 class PowerLevelEvent : public SinricProEvent {
 public:

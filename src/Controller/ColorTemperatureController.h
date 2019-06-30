@@ -37,6 +37,8 @@ private:
 };
 
 bool ColorTemperatureController::handle(SinricProCommand& cmd) {
+  DEBUG_SINRIC("ColorTemperatureController::handle()\r\n");
+
   colorTemperatureState tmpState = _colorTemperatureState;
 
   if (strcmp(cmd.getActionName(), JSON_CMD_SET_COLOR_TEMPERATURE) == 0 && _colorTempCb) {

@@ -32,6 +32,8 @@ private:
 };
 
 bool ColorController::handle(SinricProCommand& cmd){
+  DEBUG_SINRIC("ColorController::handle()\r\n");
+
   colorState tmpState = _colorState;
 
   if (strcmp(cmd.getActionName(), JSON_CMD_SET_COLOR)==0 && _colorCb) {

@@ -30,7 +30,7 @@ private:
 };
 
 bool BrightnessController::handle(SinricProCommand& cmd) {
-  DEBUG_SINRIC("handleBrightnessController()\r\n");
+  DEBUG_SINRIC("BrightnessController::handle()\r\n");
 
   brightnessState tmpState = _brightnessState;
 
