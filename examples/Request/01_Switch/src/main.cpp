@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <SinricPro.h>
-#include <Devices/SinricProSwitch.h>
 
 #define SSID "YOUR WIFI-SSID HERE"
 #define PASS "YOUR WIFI-PASS HERE"
@@ -9,7 +8,7 @@
 #define SWITCH_ID "YOUR-SWITCH-DEVICE-ID-HERE"
 
 // Instantiate SinricProSwitch
-SinricProSwitch mySwitch = SinricPro.add<SinricProSwitch>(SWITCH_ID);
+SinricProDevice mySwitch = SinricPro.add(SWITCH_ID);
 
 // Callback-Routine
 bool onPowerState(const char* deviceId, powerState state) {
