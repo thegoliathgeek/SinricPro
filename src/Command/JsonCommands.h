@@ -41,11 +41,5 @@
 #define JSON_RESULT_POWERSTATE "powerState"
 #define JSON_RESULT_POWERLEVEL "powerLevel"
 #define JSON_RESULT_BRIGHTNESS "brightness"
-#define JSON_RESULT_COLORTEMPERATURE "colorTemperatureInKelvin"
-
-#define JSON_RESULT_COLOR "color"
-#define JSON_RESULT_COLOR_R "r"
-#define JSON_RESULT_COLOR_G "g"
-#define JSON_RESULT_COLOR_B "b"
 
 #endif
