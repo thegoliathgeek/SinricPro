@@ -6,6 +6,9 @@
 #define SERVER_URL "23.95.122.232" // "192.168.1.100" // TODO: Change to your server url
 #define SERVER_PORT 3001
 
+#define UDP_MULTICAST_IP IPAddress(224,9,9,9)
+#define UDP_MULTICAST_PORT 3333
+
 // if websocket connection cannot established after WEBSOCKET_CONNECTION_TIMEOUT milliseconds
 // websocket will try to connect again
 #define WEBSOCKET_CONNECTION_TIMEOUT 30000

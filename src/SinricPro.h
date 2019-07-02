@@ -11,6 +11,7 @@
 #include "Devices/SinricProDevice.h"
 #include "Communication/SinricProQueue.h"
 #include "Communication/SinricProWebsocket.h"
+#include "Communication/SinricProUDP.h"
 #include "Request/SinricProRequest.h"
 #include "Events/SinricProEvent.h"
 
@@ -50,6 +51,7 @@ class SinricPro {
     const char* _api_key;
 
     websocketListener _websocketListener;
+    udpListener _udpListener;
     std::vector<SinricProDevice*> devices;
     unsigned long _baseTS;
 };
@@ -76,6 +78,7 @@ void SinricPro::begin(const char* api_key) {
     deviceIds += String(device->getDeviceId()) + ";";
   }
   _websocketListener.begin(api_key, deviceIds.c_str());
+  _udpListener.begin();
 }
 
 void SinricPro::begin(const String& api_key) {
@@ -84,6 +87,7 @@ void SinricPro::begin(const String& api_key) {
 
 void SinricPro::handle() {
   _websocketListener.handle();
+  _udpListener.handle();
   handleRequest();
 }
 
@@ -133,6 +137,9 @@ void SinricPro::handleRequest() {
             switch (requestPayload->getRequestSource()) {
               case CS_WEBSOCKET:
                 _websocketListener.sendResponse(responseString);
+                break;
+              case CS_UDP:
+                _udpListener.sendResponse(responseString);
                 break;
               default:
                 break;
