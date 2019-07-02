@@ -22,7 +22,7 @@ public:
   typedef std::function<bool(const char*, colorState)> ColorCallback;
   void onSetColor(ColorCallback callback) { _colorCb = callback; }
 
-  bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+  bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
 
   void setColorState(colorState& state) { _colorState = state; }
   colorState getColorState() { return _colorState; }
@@ -32,29 +32,9 @@ private:
   colorState _colorState;
 };
 
-bool ColorController::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-/*
-  if (cmd.isHandled()) return;
-  colorState tmpState = _colorState;
-
-  if (strcmp(cmd.getActionName(), JSON_CMD_SET_COLOR)==0 && _colorCb) {
-    tmpState.r = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_COLOR][JSON_PARAM_COLOR_R];
-    tmpState.g = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_COLOR][JSON_PARAM_COLOR_G];
-    tmpState.b = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_COLOR][JSON_PARAM_COLOR_B];
-    cmd.setSuccess(_colorCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
-  }
-
-  if (cmd.getSuccess()) _colorState = tmpState;
-
-  if (cmd.isHandled()) {
-    JsonObject& response = cmd.getResponse();
-    response[JSON_DEVICE][JSON_RESULT_COLOR][JSON_RESULT_COLOR_R] = _colorState.r;
-    response[JSON_DEVICE][JSON_RESULT_COLOR][JSON_RESULT_COLOR_G] = _colorState.g;
-    response[JSON_DEVICE][JSON_RESULT_COLOR][JSON_RESULT_COLOR_B] = _colorState.b;
-  }
-  */
-  return true;
+bool ColorController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
+  bool success(false);
+  return success;
 }
 
 #endif

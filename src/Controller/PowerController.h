@@ -3,6 +3,7 @@
 
 #include <ArduinoJson.h>
 #include "Request/SinricProRequest.h"
+#include "SinricProDebug.h"
 
 struct powerState {
   bool state;
@@ -20,7 +21,7 @@ public:
   typedef std::function<bool(const char*, powerState& state)> PowerStateCallback;
   void onPowerState(PowerStateCallback callback) { _powerStateCb = callback; }
 
-  bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+  bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
 
   void setPowerState(powerState& state) { _powerState = state; }
   powerState getPowerState() { return _powerState; }
@@ -33,28 +34,25 @@ private:
 // To do: deliver SinricProResponse object
 // fill response object
 
-bool PowerController::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-/*
-  if (cmd.isHandled()) return;
-  DEBUG_SINRIC("handlePowerController()\r\n");
-  powerState tmpState = _powerState;
+bool PowerController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
+  bool success(false);
+  powerState tempState = _powerState;
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_OFF)==0 && _powerStateCb) {
-    tmpState.state = false;
-    cmd.setSuccess(_powerStateCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
+  const char* deviceId = jsonRequest["deviceId"];
+  const char* action = jsonRequest["action"];
+
+  const char* value_state = jsonRequest["value"]["state"];
+
+  if (strcmp(value_state,"On")==0) tempState.state = true;
+  if (strcmp(value_state,"Off")==0) tempState.state = false;
+
+  if (_powerStateCb) {
+    success = _powerStateCb(deviceId, tempState);
+    if (success) _powerState = tempState;
+    jsonResponse["value"]["state"] = _powerState.state?"On":"Off";
   }
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_ON)==0 && _powerStateCb) {
-    tmpState.state = true;
-    cmd.setSuccess(_powerStateCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
-  }
-
-  if (cmd.getSuccess()) _powerState = tmpState;
-  if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_POWERSTATE] = _powerState.state?"On":"Off";
-  */
-  return true;
+  return success;
 }
 
 #endif

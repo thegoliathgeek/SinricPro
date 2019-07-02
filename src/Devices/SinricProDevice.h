@@ -17,7 +17,7 @@ class SinricProDevice : public PowerController,
   public:
     SinricProDevice(const char* deviceId);
     ~SinricProDevice();
-    bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+    bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
     const char* getDeviceId() { return _deviceId; }
   protected:
     char* _deviceId;
@@ -27,7 +27,7 @@ bool compare(const char* a, const char *b) {
   return strcmp(a, b) == 0;
 }
 
-bool SinricProDevice::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
+bool SinricProDevice::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
   const char* actionName = jsonRequest["action"];
   if (compare(actionName, "setPowerState")) return PowerController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "setPowerLevel")) return PowerLevelController::handle(jsonRequest, jsonResponse);

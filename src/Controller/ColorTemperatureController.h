@@ -24,7 +24,7 @@ public:
   void onIncreaseColorTemperature(ColorTemperatureCallback callback) { _incColorTempCb = callback; }
   void onDecreaseColorTemperature(ColorTemperatureCallback callback) { _decColorTempCb = callback; }
 
-  bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+  bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
 
   void setColorTemperatureState(colorTemperatureState& state) { _colorTemperatureState = state; }
   colorTemperatureState getColorTemperatureState() { return _colorTemperatureState; }
@@ -36,31 +36,9 @@ private:
   colorTemperatureState _colorTemperatureState;
 };
 
-bool ColorTemperatureController::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-/*
-  if (cmd.isHandled()) return;
-  colorTemperatureState tmpState = _colorTemperatureState;
-
-  if (strcmp(cmd.getActionName(), JSON_CMD_SET_COLOR_TEMPERATURE) == 0 && _colorTempCb) {
-    tmpState.colorTemperature = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_COLORTEMPERATURE];
-    cmd.setSuccess(_colorTempCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
-  }
-
-  if (strcmp(cmd.getActionName(), JSON_CMD_INCREASE_COLOR_TEMPERATURE) == 0 && _incColorTempCb) {
-    cmd.setSuccess(_incColorTempCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
-  }
-
-  if (strcmp(cmd.getActionName(), JSON_CMD_DECREASE_COLOR_TEMPERATURE) == 0 && _decColorTempCb) {
-    cmd.setSuccess(_decColorTempCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
-  }
-
-  if (cmd.getSuccess()) _colorTemperatureState = tmpState;
-  if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_COLORTEMPERATURE] = _colorTemperatureState.colorTemperature;
-  */
-  return true;
+bool ColorTemperatureController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
+  bool success(false);
+  return success;
 }
 
 #endif

@@ -18,7 +18,7 @@ public:
   void onPowerLevel(PowerLevelCallback callback) { _powerLevelCb = callback; }
   void onAdjustPowerLevel(PowerLevelCallback callback) { _powerLevelAdjustCb = callback; }
 
-  bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+  bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
 
   void setPowerLevelState(powerLevelState& state) { _powerLevelState = state; }
   powerLevelState getPowerLevelState() { return _powerLevelState; }
@@ -29,31 +29,36 @@ private:
   powerLevelState _powerLevelState;
 };
 
-bool PowerLevelController::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-/*  if (cmd.isHandled()) return;
-  DEBUG_SINRIC("handlePowerLevelController()\r\n");
+bool PowerLevelController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
+  bool success(false);
+  powerLevelState tempState = _powerLevelState;
 
-  powerLevelState tmpState = _powerLevelState;
+  const char* deviceId = jsonRequest["deviceId"];
+  const char* action = jsonRequest["action"];
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_SET_POWERLEVEL) == 0 && _powerLevelCb) {
-    tmpState.powerLevel = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_VALUE];
-    cmd.setSuccess(_powerLevelCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
+  if (strcmp(action, "setPowerLevel")== 0) {
+    tempState.powerLevel = jsonRequest["value"]["powerLevel"];
+
+    if (_powerLevelCb) {
+      success = _powerLevelCb(deviceId, tempState);
+    }
   }
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_ADJUST_POWERLEVEL) == 0 && _powerLevelAdjustCb) {
-    int adjust = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_POWERLEVELDELTA];
-    tmpState.powerLevel+= adjust;
-    if (tmpState.powerLevel > 100) tmpState.powerLevel = 100;
-    if (tmpState.powerLevel < 0) tmpState.powerLevel = 0;
-    cmd.setSuccess(_powerLevelAdjustCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
+  if (strcmp(action, "adjustPowerLevel") == 0) {
+    int powerDelta = jsonRequest["value"]["powerLevelDelta"];
+    DEBUG_SINRIC("delta:%i\r\n", powerDelta);
+    tempState.powerLevel += powerDelta;
+    if (tempState.powerLevel > 100) tempState.powerLevel = 100;
+    if (tempState.powerLevel < 0) tempState.powerLevel = 0;
+
+    if (_powerLevelAdjustCb) {
+      success = _powerLevelAdjustCb(deviceId, tempState);
+    }
   }
 
-  if (cmd.getSuccess()) _powerLevelState = tmpState;
-  if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_POWERLEVEL] = _powerLevelState.powerLevel;
-  */
-  return true;
+  if (success) _powerLevelState = tempState;
+  jsonResponse["value"]["powerLevel"] = _powerLevelState.powerLevel;
+  return success;
 }
 
 #endif

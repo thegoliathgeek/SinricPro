@@ -87,60 +87,60 @@ void SinricPro::handle() {
   handleRequest();
 }
 
-void prepareResponse(const JsonObject& jsonRequest, JsonObject& jsonResponse, unsigned long ts) {
+void prepareResponse(const JsonDocument& jsonRequest, JsonDocument& jsonResponse, unsigned long ts) {
   jsonResponse["payloadVersion"] = 1;
   jsonResponse["success"] = false;
   jsonResponse["message"] = "OK";
-  jsonResponse["ts"] = ts;
-  jsonResponse["did"] = jsonRequest["did"];
+  jsonResponse["createdAt"] = ts;
+  jsonResponse["deviceId"] = jsonRequest["deviceId"];
   jsonResponse["type"] = "response";
   jsonResponse["action"] = jsonRequest["action"];
-  jsonResponse["value"] = jsonRequest["value"];
+  jsonResponse.createNestedObject("value");
+//  jsonResponse["value"] = jsonRequest["value"];
 }
 
 void SinricPro::handleRequest() {
+
   if (requestQueue.count() > 0) {
     DEBUG_SINRIC("[SinricPro.handleRequest()]: %i requests in queue\r\n", requestQueue.count());
     // POP requests and call device.handle() for each related device
     while (requestQueue.count() > 0) {
       SinricProRequestPayload* requestPayload = requestQueue.pop();
-
-      // decode jsonRequest
-      DynamicJsonDocument jsonRequestDoc(512);
-      DeserializationError err = deserializeJson(jsonRequestDoc, requestPayload->getRequest());
+      DynamicJsonDocument jsonRequest(512);
+      DeserializationError err = deserializeJson(jsonRequest, requestPayload->getRequest());
 
       if (err) {
         DEBUG_SINRIC("[SinricPro.handleRequest()]: Error (%s) while parsing json request\r\n", err.c_str());
         return;
       }
 
-      JsonObject jsonRequest = jsonRequestDoc.as<JsonObject>();
+      int payloadVersion = jsonRequest["payloadVersion"]; // 1
+      const char* clientId = jsonRequest["clientId"]; // "alexa-skill"
+      long createdAt = jsonRequest["createdAt"]; // 1562001822
+      const char* deviceId = jsonRequest["deviceId"]; // "5d12df23eb7e894a699e0ae8"
+      const char* type = jsonRequest["type"]; // "request"
+      const char* action = jsonRequest["action"]; // "setPowerState"
+      const char* value_state = jsonRequest["value"]["state"]; // "On"
 
-      if (jsonRequest.containsKey("did") && jsonRequest.containsKey("action")) {
-        if (jsonRequest.containsKey("ts")) {
-          syncTimestamp(jsonRequest["ts"].as<unsigned long int>());
-        }
+      syncTimestamp(createdAt);
 
-        for (auto& device : devices) {
-          if (strcmp(device->getDeviceId(), jsonRequest["did"]) == 0) {
-              DynamicJsonDocument jsonResponseDoc(512);
-              JsonObject jsonResponse = jsonResponseDoc.as<JsonObject>();
+      for (auto& device : devices) {
+        if (strcmp(device->getDeviceId(), jsonRequest["deviceId"]) == 0) {
+            DynamicJsonDocument jsonResponse(512);
+            prepareResponse(jsonRequest, jsonResponse, getTimestamp());
 
-              prepareResponse(jsonRequest, jsonResponse, getTimestamp());
-              device->handle(jsonRequest, jsonResponse);
+            jsonResponse["success"] = device->handle(jsonRequest, jsonResponse);
 
-              if (jsonResponse["success"]) {
-                String responseString;
-                serializeJsonPretty(jsonResponse, responseString);
+            String responseString; 
+            serializeJsonPretty(jsonResponse, responseString);
+            DEBUG_SINRIC("Response: %s\r\n", responseString.c_str());
 
-                switch (requestPayload->getRequestSource()) {
-                  case CS_WEBSOCKET:
-                    _websocketListener.sendResponse(responseString);
-                    break;
-                  default:
-                    break;
-                }
-              }
+            switch (requestPayload->getRequestSource()) {
+              case CS_WEBSOCKET:
+                _websocketListener.sendResponse(responseString);
+                break;
+              default:
+                break;
           }
         }
       }

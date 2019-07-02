@@ -18,7 +18,7 @@ public:
   void onSetBrightness(BrightnessLevelCallback callback) { _brightnessLevelCb = callback; }
   void onAdjustBrightness(BrightnessLevelCallback callback) { _brightnessAdjustCb = callback; }
 
-  bool handle(JsonObject& jsonRequest, JsonObject& jsonResponse);
+  bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
 
   void setBrightnessState(brightnessState& state) { _brightnessState = state; }
   brightnessState getBrightnessState() { return _brightnessState; }
@@ -29,32 +29,36 @@ private:
   brightnessState _brightnessState;
 };
 
-bool BrightnessController::handle(JsonObject& jsonRequest, JsonObject& jsonResponse) {
-/*
-  if (cmd.isHandled()) return;
-  DEBUG_SINRIC("handleBrightnessController()\r\n");
+bool BrightnessController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
+  bool success(false);
+  brightnessState tempState = _brightnessState;
 
-  brightnessState tmpState = _brightnessState;
+  const char* deviceId = jsonRequest["deviceId"];
+  const char* action = jsonRequest["action"];
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_SET_BRIGHTNESS) == 0 && _brightnessLevelCb) {
-    tmpState.brightness = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_BRIGHTNESS];
-    cmd.setSuccess(_brightnessLevelCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
+  if (strcmp(action, "setBrightness")== 0) {
+    tempState.brightness = jsonRequest["value"]["brightness"];
+
+    if (_brightnessLevelCb) {
+      success = _brightnessLevelCb(deviceId, tempState);
+    }
   }
 
-  if (strcmp(cmd.getActionName(), JSON_CMD_ADJUST_BRIGHTNESS) == 0 && _brightnessAdjustCb) {
-    int adjust = cmd.getAction()[JSON_PARAMETERS][JSON_PARAM_BRIGHTNESSDELTA];
-    tmpState.brightness+= adjust;
-    if (tmpState.brightness > 100) tmpState.brightness = 100;
-    if (tmpState.brightness < 0) tmpState.brightness = 0;
-    cmd.setSuccess(_brightnessAdjustCb(cmd.getDeviceId(), tmpState));
-    cmd.setHandled(true);
+  if (strcmp(action, "adjustBrightness") == 0) {
+    int brightnessDelta = jsonRequest["value"]["brightnessDelta"];
+    DEBUG_SINRIC("delta:%i\r\n", brightnessDelta);
+    tempState.brightness += brightnessDelta;
+    if (tempState.brightness > 100) tempState.brightness = 100;
+    if (tempState.brightness < 0) tempState.brightness = 0;
+
+    if (_brightnessAdjustCb) {
+      success = _brightnessAdjustCb(deviceId, tempState);
+    }
   }
 
-  if (cmd.getSuccess()) _brightnessState = tmpState;
-  if (cmd.isHandled()) cmd.getResponse()[JSON_DEVICE][JSON_RESULT_BRIGHTNESS] = _brightnessState.brightness;
-  */
-  return true;
+  if (success) _brightnessState = tempState;
+  jsonResponse["value"]["brightness"] = _brightnessState.brightness;
+  return success;
 }
 
 #endif
