@@ -25,7 +25,6 @@ public:
 private:
   PowerLevelCallback _powerLevelCb;
   PowerLevelCallback _powerLevelAdjustCb;
-
   powerLevelState _powerLevelState;
 };
 
@@ -36,24 +35,21 @@ bool PowerLevelController::handle(JsonDocument& jsonRequest, JsonDocument& jsonR
   const char* deviceId = jsonRequest["deviceId"];
   const char* action = jsonRequest["action"];
 
+  // setPowerLevel request
   if (strcmp(action, "setPowerLevel")== 0) {
     tempState.powerLevel = jsonRequest["value"]["powerLevel"];
 
-    if (_powerLevelCb) {
-      success = _powerLevelCb(deviceId, tempState);
-    }
+    if (_powerLevelCb) success = _powerLevelCb(deviceId, tempState);
   }
 
+  // adjustPowerLevel request
   if (strcmp(action, "adjustPowerLevel") == 0) {
-    int powerDelta = jsonRequest["value"]["powerLevelDelta"];
-    DEBUG_SINRIC("delta:%i\r\n", powerDelta);
-    tempState.powerLevel += powerDelta;
+    int powerLevelDelta = jsonRequest["value"]["powerLevelDelta"];
+    tempState.powerLevel += powerLevelDelta;
     if (tempState.powerLevel > 100) tempState.powerLevel = 100;
     if (tempState.powerLevel < 0) tempState.powerLevel = 0;
 
-    if (_powerLevelAdjustCb) {
-      success = _powerLevelAdjustCb(deviceId, tempState);
-    }
+    if (_powerLevelAdjustCb) success = _powerLevelAdjustCb(deviceId, tempState);
   }
 
   if (success) _powerLevelState = tempState;

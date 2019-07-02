@@ -31,9 +31,6 @@ private:
   powerState _powerState;
 };
 
-// To do: deliver SinricProResponse object
-// fill response object
-
 bool PowerController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
   bool success(false);
   powerState tempState = _powerState;
@@ -41,17 +38,18 @@ bool PowerController::handle(JsonDocument& jsonRequest, JsonDocument& jsonRespon
   const char* deviceId = jsonRequest["deviceId"];
   const char* action = jsonRequest["action"];
 
-  const char* value_state = jsonRequest["value"]["state"];
+  // setPowerState request
+  if (strcmp(action, "setPowerState")==0) {
+    const char* value_state = jsonRequest["value"]["state"];
 
-  if (strcmp(value_state,"On")==0) tempState.state = true;
-  if (strcmp(value_state,"Off")==0) tempState.state = false;
+    if (strcmp(value_state,"On")==0) tempState.state = true;
+    if (strcmp(value_state,"Off")==0) tempState.state = false;
 
-  if (_powerStateCb) {
-    success = _powerStateCb(deviceId, tempState);
-    if (success) _powerState = tempState;
-    jsonResponse["value"]["state"] = _powerState.state?"On":"Off";
+    if (_powerStateCb) success = _powerStateCb(deviceId, tempState);
   }
 
+  if (success) _powerState = tempState;
+  jsonResponse["value"]["state"] = _powerState.state?"On":"Off";
   return success;
 }
 

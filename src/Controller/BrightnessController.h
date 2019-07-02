@@ -36,14 +36,14 @@ bool BrightnessController::handle(JsonDocument& jsonRequest, JsonDocument& jsonR
   const char* deviceId = jsonRequest["deviceId"];
   const char* action = jsonRequest["action"];
 
+  // setBrightness request
   if (strcmp(action, "setBrightness")== 0) {
     tempState.brightness = jsonRequest["value"]["brightness"];
 
-    if (_brightnessLevelCb) {
-      success = _brightnessLevelCb(deviceId, tempState);
-    }
+    if (_brightnessLevelCb) success = _brightnessLevelCb(deviceId, tempState);
   }
 
+  // adjustBrightness request
   if (strcmp(action, "adjustBrightness") == 0) {
     int brightnessDelta = jsonRequest["value"]["brightnessDelta"];
     DEBUG_SINRIC("delta:%i\r\n", brightnessDelta);
@@ -51,9 +51,7 @@ bool BrightnessController::handle(JsonDocument& jsonRequest, JsonDocument& jsonR
     if (tempState.brightness > 100) tempState.brightness = 100;
     if (tempState.brightness < 0) tempState.brightness = 0;
 
-    if (_brightnessAdjustCb) {
-      success = _brightnessAdjustCb(deviceId, tempState);
-    }
+    if (_brightnessAdjustCb) success = _brightnessAdjustCb(deviceId, tempState);
   }
 
   if (success) _brightnessState = tempState;

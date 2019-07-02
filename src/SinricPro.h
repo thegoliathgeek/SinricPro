@@ -12,7 +12,6 @@
 #include "Communication/SinricProQueue.h"
 #include "Communication/SinricProWebsocket.h"
 #include "Request/SinricProRequest.h"
-#include "Request/JsonRequests.h"
 #include "Events/SinricProEvent.h"
 
 class SinricPro {
@@ -47,6 +46,7 @@ class SinricPro {
     int size() { return devices.size(); }
 
   private:
+    void prepareResponse(const JsonDocument& jsonRequest, JsonDocument& jsonResponse, unsigned long createdAt);
     const char* _api_key;
 
     websocketListener _websocketListener;
@@ -87,16 +87,15 @@ void SinricPro::handle() {
   handleRequest();
 }
 
-void prepareResponse(const JsonDocument& jsonRequest, JsonDocument& jsonResponse, unsigned long ts) {
+void SinricPro::prepareResponse(const JsonDocument& jsonRequest, JsonDocument& jsonResponse, unsigned long createdAt) {
   jsonResponse["payloadVersion"] = 1;
   jsonResponse["success"] = false;
   jsonResponse["message"] = "OK";
-  jsonResponse["createdAt"] = ts;
+  jsonResponse["createdAt"] = createdAt;
   jsonResponse["deviceId"] = jsonRequest["deviceId"];
   jsonResponse["type"] = "response";
   jsonResponse["action"] = jsonRequest["action"];
   jsonResponse.createNestedObject("value");
-//  jsonResponse["value"] = jsonRequest["value"];
 }
 
 void SinricPro::handleRequest() {
@@ -114,25 +113,21 @@ void SinricPro::handleRequest() {
         return;
       }
 
-      int payloadVersion = jsonRequest["payloadVersion"]; // 1
-      const char* clientId = jsonRequest["clientId"]; // "alexa-skill"
       long createdAt = jsonRequest["createdAt"]; // 1562001822
       const char* deviceId = jsonRequest["deviceId"]; // "5d12df23eb7e894a699e0ae8"
-      const char* type = jsonRequest["type"]; // "request"
-      const char* action = jsonRequest["action"]; // "setPowerState"
-      const char* value_state = jsonRequest["value"]["state"]; // "On"
 
       syncTimestamp(createdAt);
 
       for (auto& device : devices) {
-        if (strcmp(device->getDeviceId(), jsonRequest["deviceId"]) == 0) {
+        if (strcmp(device->getDeviceId(), deviceId) == 0) {
             DynamicJsonDocument jsonResponse(512);
             prepareResponse(jsonRequest, jsonResponse, getTimestamp());
 
             jsonResponse["success"] = device->handle(jsonRequest, jsonResponse);
 
-            String responseString; 
+            String responseString;
             serializeJsonPretty(jsonResponse, responseString);
+
             DEBUG_SINRIC("Response: %s\r\n", responseString.c_str());
 
             switch (requestPayload->getRequestSource()) {

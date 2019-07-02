@@ -38,6 +38,30 @@ private:
 
 bool ColorTemperatureController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
   bool success(false);
+  colorTemperatureState tempState = _colorTemperatureState;
+
+  const char* deviceId = jsonRequest["deviceId"];
+  const char* action = jsonRequest["action"];
+
+  // setcolorTemperature request
+  if (strcmp(action, "setcolorTemperature")==0) {
+    tempState.colorTemperature = jsonRequest["value"]["colorTemperature"];
+
+    if (_colorTempCb) success = _colorTempCb(deviceId, tempState);
+  }
+
+  // increaseColorTemperature request
+  if (strcmp(action, "increaseColorTemperature")==0) {
+    if (_incColorTempCb) success = _incColorTempCb(deviceId, tempState);
+  }
+
+  // decreaseColorTemperature request
+  if (strcmp(action, "decreaseColorTemperature")==0) {
+    if (_incColorTempCb) success = _decColorTempCb(deviceId, tempState);
+  }
+
+  if (success) _colorTemperatureState = tempState;
+  jsonResponse["value"]["colorTemperature"] = _colorTemperatureState.colorTemperature;
   return success;
 }
 

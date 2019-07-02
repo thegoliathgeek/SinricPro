@@ -34,6 +34,25 @@ private:
 
 bool ColorController::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
   bool success(false);
+  colorState tempState = _colorState;
+
+  const char* deviceId = jsonRequest["deviceId"];
+  const char* action = jsonRequest["action"];
+
+  // setColor request
+  if (strcmp(action, "setColor")== 0) {
+    tempState.r = jsonRequest["value"]["color"]["r"];
+    tempState.g = jsonRequest["value"]["color"]["g"];
+    tempState.b = jsonRequest["value"]["color"]["b"];
+
+    if (_colorCb) success = _colorCb(deviceId, tempState);
+  }
+
+  if (success) _colorState = tempState;
+  jsonResponse["value"].createNestedObject("color");
+  jsonResponse["value"]["color"]["r"] = _colorState.r;
+  jsonResponse["value"]["color"]["g"] = _colorState.g;
+  jsonResponse["value"]["color"]["b"] = _colorState.b;
   return success;
 }
 
