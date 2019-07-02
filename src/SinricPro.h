@@ -107,6 +107,7 @@ void SinricPro::handleRequest() {
       SinricProRequestPayload* requestPayload = requestQueue.pop();
       DynamicJsonDocument jsonRequest(512);
       DeserializationError err = deserializeJson(jsonRequest, requestPayload->getRequest());
+      DEBUG_SINRIC("REQUEST===\r\n%s\r\n===REQUEST\r\n",requestPayload->getRequest());
 
       if (err) {
         DEBUG_SINRIC("[SinricPro.handleRequest()]: Error (%s) while parsing json request\r\n", err.c_str());
@@ -122,13 +123,12 @@ void SinricPro::handleRequest() {
         if (strcmp(device->getDeviceId(), deviceId) == 0) {
             DynamicJsonDocument jsonResponse(512);
             prepareResponse(jsonRequest, jsonResponse, getTimestamp());
-
             jsonResponse["success"] = device->handle(jsonRequest, jsonResponse);
 
             String responseString;
-            serializeJsonPretty(jsonResponse, responseString);
+            serializeJson(jsonResponse, responseString);
 
-            DEBUG_SINRIC("Response: %s\r\n", responseString.c_str());
+            DEBUG_SINRIC("RESPONSE===\r\n%s\r\n===RESPONSE\r\n", responseString.c_str());
 
             switch (requestPayload->getRequestSource()) {
               case CS_WEBSOCKET:

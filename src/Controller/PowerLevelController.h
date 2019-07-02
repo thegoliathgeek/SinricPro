@@ -14,7 +14,7 @@ struct powerLevelState {
 class PowerLevelController {
 public:
   PowerLevelController() : _powerLevelCb(nullptr), _powerLevelAdjustCb(nullptr) {};
-  typedef std::function<bool(const char*, powerLevelState state)> PowerLevelCallback;
+  typedef std::function<bool(const char*, powerLevelState&)> PowerLevelCallback;
   void onPowerLevel(PowerLevelCallback callback) { _powerLevelCb = callback; }
   void onAdjustPowerLevel(PowerLevelCallback callback) { _powerLevelAdjustCb = callback; }
 

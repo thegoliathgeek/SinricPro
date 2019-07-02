@@ -19,7 +19,7 @@ struct colorState {
 class ColorController {
 public:
   ColorController() : _colorCb(nullptr) {}
-  typedef std::function<bool(const char*, colorState)> ColorCallback;
+  typedef std::function<bool(const char*, colorState&)> ColorCallback;
   void onSetColor(ColorCallback callback) { _colorCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);

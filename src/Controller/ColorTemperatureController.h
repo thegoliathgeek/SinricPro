@@ -18,7 +18,7 @@ public:
     _incColorTempCb(nullptr),
     _decColorTempCb(nullptr) {
   };
-  typedef std::function<bool(const char*, colorTemperatureState)> ColorTemperatureCallback;
+  typedef std::function<bool(const char*, colorTemperatureState&)> ColorTemperatureCallback;
 
   void onSetColorTemperature(ColorTemperatureCallback callback) { _colorTempCb = callback; }
   void onIncreaseColorTemperature(ColorTemperatureCallback callback) { _incColorTempCb = callback; }
@@ -44,7 +44,7 @@ bool ColorTemperatureController::handle(JsonDocument& jsonRequest, JsonDocument&
   const char* action = jsonRequest["action"];
 
   // setcolorTemperature request
-  if (strcmp(action, "setcolorTemperature")==0) {
+  if (strcmp(action, "setColorTemperature")==0) {
     tempState.colorTemperature = jsonRequest["value"]["colorTemperature"];
 
     if (_colorTempCb) success = _colorTempCb(deviceId, tempState);

@@ -18,7 +18,7 @@ struct powerState {
 class PowerController {
 public:
   PowerController() : _powerStateCb(nullptr) {};
-  typedef std::function<bool(const char*, powerState& state)> PowerStateCallback;
+  typedef std::function<bool(const char*, powerState&)> PowerStateCallback;
   void onPowerState(PowerStateCallback callback) { _powerStateCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);

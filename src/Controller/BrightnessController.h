@@ -14,7 +14,7 @@ struct brightnessState {
 class BrightnessController {
 public:
   BrightnessController() : _brightnessLevelCb(nullptr) {}
-  typedef std::function<bool(const char*, brightnessState)> BrightnessLevelCallback;
+  typedef std::function<bool(const char*, brightnessState&)> BrightnessLevelCallback;
   void onSetBrightness(BrightnessLevelCallback callback) { _brightnessLevelCb = callback; }
   void onAdjustBrightness(BrightnessLevelCallback callback) { _brightnessAdjustCb = callback; }
 

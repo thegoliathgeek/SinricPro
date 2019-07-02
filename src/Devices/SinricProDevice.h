@@ -29,12 +29,17 @@ bool compare(const char* a, const char *b) {
 
 bool SinricProDevice::handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse) {
   const char* actionName = jsonRequest["action"];
+  // PowerController
   if (compare(actionName, "setPowerState")) return PowerController::handle(jsonRequest, jsonResponse);
+  // PowerLevelController
   if (compare(actionName, "setPowerLevel")) return PowerLevelController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "adjustPowerLevel")) return PowerLevelController::handle(jsonRequest, jsonResponse);
+  // BrightnessController
   if (compare(actionName, "setBrightness")) return BrightnessController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "adjustBrightness")) return BrightnessController::handle(jsonRequest, jsonResponse);
+  // ColorController
   if (compare(actionName, "setColor")) return ColorController::handle(jsonRequest, jsonResponse);
+  // ColorTemperatureController
   if (compare(actionName, "setColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "increaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "decreaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
