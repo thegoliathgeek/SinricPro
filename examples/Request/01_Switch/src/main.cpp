@@ -7,11 +7,8 @@
 #define API_KEY "YOUR-SINRIC-PRO-API-KEY-HERE"
 #define SWITCH_ID "YOUR-SWITCH-DEVICE-ID-HERE"
 
-// Instantiate SinricProSwitch
-SinricProDevice mySwitch = SinricPro.add(SWITCH_ID);
-
 // Callback-Routine
-bool onPowerState(const char* deviceId, powerState state) {
+bool onPowerState(const char* deviceId, powerState& state) {
   Serial.printf("Device %s turned %s\r\n", deviceId, state.state?"ON":"OFF");
   return true;
 }
@@ -29,6 +26,7 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
+  SinricProDevice& mySwitch = SinricPro.add(SWITCH_ID);
   mySwitch.onPowerState(onPowerState);    // set callback routine
   SinricPro.begin(API_KEY);               // start SinricPro
 }

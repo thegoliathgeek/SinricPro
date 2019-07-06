@@ -7,17 +7,20 @@
 #define API_KEY "YOUR-SINRIC-PRO-API-KEY-HERE"
 #define DIMSWITCH_ID "YOUR-DIM-SWITCH-DEVICE-ID-HERE"
 
-// Instantiate SinricProDimSwitch (dimmable Switch)
-SinricProDevice myDimSwitch = SinricPro.add(DIMSWITCH_ID);
-
 // Callback-Routine for on/off request
-bool onPowerState(const char* deviceId, powerState state) {
+bool onPowerState(const char* deviceId, powerState& state) {
   Serial.printf("Device %s turned %s\r\n", deviceId, state.state?"ON":"OFF");
   return true;
 }
 
 // Callback-Routine for power-level request
-bool onPowerLevel(const char* deviceId, powerLevelState state) {
+bool onPowerLevel(const char* deviceId, powerLevelState& state) {
+  Serial.printf("Device %s set power-level to %i\r\n", deviceId, state.powerLevel);
+  return true;
+}
+
+// Callback-Routine for adjustPowerLevel request
+bool onAdjustPowerLevel(const char* deviceId, powerLevelState& state) {
   Serial.printf("Device %s set power-level to %i\r\n", deviceId, state.powerLevel);
   return true;
 }
@@ -35,8 +38,10 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
+  SinricProDevice& myDimSwitch = SinricPro.add(DIMSWITCH_ID);
   myDimSwitch.onPowerState(onPowerState);  // set callback routine for on/off request
   myDimSwitch.onPowerLevel(onPowerLevel);  // set callback for power-level request
+  myDimSwitch.onAdjustPowerLevel(onAdjustPowerLevel);  // set callback for adjust-power-level request
   SinricPro.begin(API_KEY);                // start SinricPro
 }
 

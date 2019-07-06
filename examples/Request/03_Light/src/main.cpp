@@ -7,47 +7,44 @@
 #define API_KEY "YOUR-SINRIC-PRO-API-KEY-HERE"
 #define LIGHT_ID "YOUR-LIGHT-DEVICE-ID-HERE"
 
-// Instantiate SinricProDimSwitch (dimmable Switch)
-SinricProDevice myLight = SinricPro.add(LIGHT_ID);
-
 // Callback-Routine for on/off request
-bool onPowerState(const char* deviceId, powerState state) {
+bool onPowerState(const char* deviceId, powerState& state) {
   Serial.printf("Device %s turned %s\r\n", deviceId, state.state?"ON":"OFF");
   return true;
 }
 
 // Callback-Routine for brightness-level request
-bool onSetBrightness(const char* deviceId, brightnessState state) {
+bool onSetBrightness(const char* deviceId, brightnessState& state) {
   Serial.printf("Device %s set power-level to %i\r\n", deviceId, state.brightness);
   return true;
 }
 
 // Callback-Routine for brightness-adjustment request
-bool onAdjustBrightness(const char* deviceId, brightnessState state) {
+bool onAdjustBrightness(const char* deviceId, brightnessState& state) {
   Serial.printf("Device %s set power-level to %i\r\n", deviceId, state.brightness);
   return true;
 }
 
 // Callback-Routine for color request
-bool onSetColor(const char* deviceId, colorState state) {
+bool onSetColor(const char* deviceId, colorState& state) {
   Serial.printf("Device %s sets color to r:%i, g:%i, b:%i\r\n", deviceId, state.r, state.g, state.b);
   return true;
 }
 
 // Callback-Routine for color-temperature request
-bool onSetColorTemperature(const char* deviceId, colorTemperatureState state) {
+bool onSetColorTemperature(const char* deviceId, colorTemperatureState& state) {
   Serial.printf("Device %s sets color-temperature to %i\r\n", deviceId, state.colorTemperature);
   return true;
 }
 
 // Callback-Routine for color-temperature-increase request
-bool onIncreaseColorTemperature(const char* deviceId, colorTemperatureState state) {
+bool onIncreaseColorTemperature(const char* deviceId, colorTemperatureState& state) {
   Serial.printf("Device %s increase color-temperature to %i\r\n", deviceId, state.colorTemperature);
   return true;
 }
 
 // Callback-Routine for color-temperature-decrease request
-bool onDecreaseColorTemperature(const char* deviceId, colorTemperatureState state) {
+bool onDecreaseColorTemperature(const char* deviceId, colorTemperatureState& state) {
   Serial.printf("Device %s decrease color-temperature to %i\r\n", deviceId, state.colorTemperature);
   return true;
 }
@@ -66,6 +63,7 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
+  SinricProDevice& myLight = SinricPro.add(LIGHT_ID);
   myLight.onPowerState(onPowerState);             // set callback routine for on/off request
   myLight.onSetBrightness(onSetBrightness);       // set callback for power-level request
   myLight.onAdjustBrightness(onAdjustBrightness); // set callback for adjust-brightness request
