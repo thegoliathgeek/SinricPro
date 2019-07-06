@@ -12,7 +12,7 @@ class udpListener {
 public:
   void begin();
   void handle();
-  void sendResponse(String& response);
+  void sendResponse(String response);
   void stop();
 private:
   WiFiUDP _udp;
@@ -35,7 +35,7 @@ void udpListener::handle() {
   }
 }
 
-void udpListener::sendResponse(String& response) {
+void udpListener::sendResponse(String response) {
   _udp.beginPacket(_udp.remoteIP(), _udp.remotePort());
   _udp.write(response.c_str());
   _udp.endPacket();

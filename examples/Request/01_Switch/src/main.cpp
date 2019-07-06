@@ -26,8 +26,7 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
-  SinricProDevice& mySwitch = SinricPro.add(SWITCH_ID);
-  mySwitch.onPowerState(onPowerState);    // set callback routine
+  SinricPro[SWITCH_ID].onPowerState(onPowerState); // automatic create device and set callback routine
   SinricPro.begin(API_KEY);               // start SinricPro
 }
 

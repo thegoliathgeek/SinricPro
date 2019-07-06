@@ -38,10 +38,9 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
-  SinricProDevice& myDimSwitch = SinricPro.add(DIMSWITCH_ID);
-  myDimSwitch.onPowerState(onPowerState);  // set callback routine for on/off request
-  myDimSwitch.onPowerLevel(onPowerLevel);  // set callback for power-level request
-  myDimSwitch.onAdjustPowerLevel(onAdjustPowerLevel);  // set callback for adjust-power-level request
+  SinricPro[DIMSWITCH_ID].onPowerState(onPowerState);  // automatic create device and set callback routine for on/off request
+  SinricPro[DIMSWITCH_ID].onPowerLevel(onPowerLevel);  // set callback for power-level request
+  SinricPro[DIMSWITCH_ID].onAdjustPowerLevel(onAdjustPowerLevel);  // set callback for adjust-power-level request
   SinricPro.begin(API_KEY);                // start SinricPro
 }
 

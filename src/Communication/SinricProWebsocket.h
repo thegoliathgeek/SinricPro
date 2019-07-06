@@ -23,7 +23,7 @@ class websocketListener
     void stop();
     bool isConnected() { return _isConnected; }
 
-    void sendResponse(String& response);
+    void sendResponse(String response);
     void sendEvent(String& event) { sendResponse(event); }
 
     void onConnected(wsConnectedCallback callback) { _wsConnectedCb = callback; }
@@ -77,7 +77,7 @@ void websocketListener::stop() {
   }
 }
 
-void websocketListener::sendResponse(String& response) {
+void websocketListener::sendResponse(String response) {
   webSocket.sendTXT(response);
 }
 

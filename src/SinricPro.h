@@ -33,6 +33,9 @@ class SinricPro {
     SinricProDevice& add(const char* deviceId);
     SinricProDevice& add(const String& deviceId);
 
+    SinricProDevice* getDevice(const char* deviceId, bool autoCreate = true);
+    SinricProDevice* getDevice(const String& deviceId, bool autoCreate = true);
+
     boolean remove(const char* deviceId);
     boolean remove(const String& deviceId);
 
@@ -40,8 +43,10 @@ class SinricPro {
     void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
     void raiseEvent(SinricProEvent& event);
-    SinricProDevice& operator[] (int index)  { return *devices[index]; }
-    SinricProDevice* operator[] (const char* deviceId);
+//    SinricProDevice& operator[] (int index)  { return *devices[index]; } removed for security reasons
+    SinricProDevice& operator[] (const char* deviceId);
+    SinricProDevice& operator[] (const String& deviceId);
+
     std::vector<SinricProDevice*>::iterator begin() { return devices.begin(); }
     std::vector<SinricProDevice*>::iterator end() { return devices.end(); }
     int size() { return devices.size(); }
@@ -113,40 +118,40 @@ void SinricPro::handleRequest() {
       SinricProRequestPayload* requestPayload = requestQueue.pop();
       DynamicJsonDocument jsonRequest(512);
       DeserializationError err = deserializeJson(jsonRequest, requestPayload->getRequest());
-      DEBUG_SINRIC("REQUEST===\r\n%s\r\n===REQUEST\r\n",requestPayload->getRequest());
+
 
       if (err) {
         DEBUG_SINRIC("[SinricPro.handleRequest()]: Error (%s) while parsing json request\r\n", err.c_str());
         return;
       }
 
+      String jsonRequestPretty;
+      serializeJsonPretty(jsonRequest, jsonRequestPretty);
+      DEBUG_SINRIC("[SinricPro.handleRequest()]: request:\r\n%s\r\n",jsonRequestPretty.c_str());
+
       long createdAt = jsonRequest["createdAt"]; // 1562001822
       const char* deviceId = jsonRequest["deviceId"]; // "5d12df23eb7e894a699e0ae8"
 
       syncTimestamp(createdAt);
 
-      for (auto& device : devices) {
-        if (strcmp(device->getDeviceId(), deviceId) == 0) {
-            DynamicJsonDocument jsonResponse(512);
-            prepareResponse(jsonRequest, jsonResponse, getTimestamp());
-            jsonResponse["success"] = device->handle(jsonRequest, jsonResponse);
+      SinricProDevice* device = getDevice(deviceId, false); // get device
 
-            String responseString;
-            serializeJson(jsonResponse, responseString);
+      if (device) {
+        DynamicJsonDocument jsonResponse(512);
+        prepareResponse(jsonRequest, jsonResponse, getTimestamp());
+        jsonResponse["success"] = device->handle(jsonRequest, jsonResponse);
 
-            DEBUG_SINRIC("RESPONSE===\r\n%s\r\n===RESPONSE\r\n", responseString.c_str());
+        String responseString;
+        serializeJsonPretty(jsonResponse, responseString);
+        DEBUG_SINRIC("[SinricPro.handleRequest()]: response:\r\n%s\r\n", responseString.c_str());
 
-            switch (requestPayload->getRequestSource()) {
-              case CS_WEBSOCKET:
-                _websocketListener.sendResponse(responseString);
-                break;
-              case CS_UDP:
-                _udpListener.sendResponse(responseString);
-                break;
-              default:
-                break;
-          }
+        switch (requestPayload->getRequestSource()) {
+          case CS_WEBSOCKET: _websocketListener.sendResponse(responseString); break;
+          case CS_UDP:       _udpListener.sendResponse(responseString); break;
+          default:           break;
         }
+      } else {
+        DEBUG_SINRIC("[SinricPro.handleCommand()]: Device \"%s\" doesn't exist!\r\n", deviceId);
       }
       delete requestPayload;
     }
@@ -161,7 +166,6 @@ bool SinricPro::isConnected() {
   return _websocketListener.isConnected();
 };
 
-
 SinricProDevice& SinricPro::add(const char* deviceId) {
   DEBUG_SINRIC("[SinricPro]: Add device %s\r\n", deviceId);
 
@@ -172,6 +176,33 @@ SinricProDevice& SinricPro::add(const char* deviceId) {
 
 SinricProDevice& SinricPro::add(const String& deviceId) {
   return add(deviceId.c_str());
+}
+
+SinricProDevice* SinricPro::getDevice(const char* deviceId, bool autoCreate) {
+  for (auto& device : devices) {
+    if (strcmp(device->getDeviceId(), deviceId) == 0) return device;
+  }
+
+  if (autoCreate) {
+    DEBUG_SINRIC("[SinricPro]: Add device %s\r\n", deviceId);
+    SinricProDevice* newDevice = new SinricProDevice(deviceId);
+    devices.push_back(newDevice);
+    return newDevice;
+  } else return nullptr;
+
+  // if there is no device with deviceId, create a new one
+}
+
+SinricProDevice* SinricPro::getDevice(const String& deviceId, bool autoCreate) {
+  return getDevice(deviceId.c_str(), autoCreate);
+}
+
+SinricProDevice& SinricPro::operator[] (const char* deviceId) {
+  return *getDevice(deviceId);
+}
+
+SinricProDevice& SinricPro::operator[](const String& deviceId) {
+  return *getDevice(deviceId);
 }
 
 boolean SinricPro::remove(const char* deviceId) {
@@ -199,14 +230,6 @@ void SinricPro::raiseEvent(SinricProEvent& event) {
   DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
   _websocketListener.sendEvent(tmpString);
 }
-
-SinricProDevice* SinricPro::operator[] (const char* deviceId) {
-  for (auto& device : devices) {
-    if (strcmp(device->getDeviceId(), deviceId) == 0) return device;
-  }
-  return nullptr;
-}
-
 
 #ifndef SINRIC_NOINSTANCE
 SinricPro SinricPro;

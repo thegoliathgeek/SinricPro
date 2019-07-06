@@ -1,9 +1,7 @@
 #ifndef __SINRICPRO_CONFIG_H__
 #define __SINRICPRO_CONFIG_H__
 
-/* Version */
-#define SDK_VERSION "v0.0.13"
-#define SERVER_URL "23.95.122.232" // "192.168.1.100" // TODO: Change to your server url
+#define SERVER_URL "23.95.122.232" 
 #define SERVER_PORT 3001
 
 #define UDP_MULTICAST_IP IPAddress(224,9,9,9)

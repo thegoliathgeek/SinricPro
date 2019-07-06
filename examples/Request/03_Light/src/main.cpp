@@ -63,14 +63,13 @@ void setupWiFi() {
 
 // Setup SinricPro
 void setupSinricPro() {
-  SinricProDevice& myLight = SinricPro.add(LIGHT_ID);
-  myLight.onPowerState(onPowerState);             // set callback routine for on/off request
-  myLight.onSetBrightness(onSetBrightness);       // set callback for power-level request
-  myLight.onAdjustBrightness(onAdjustBrightness); // set callback for adjust-brightness request
-  myLight.onSetColor(onSetColor);                 // set callback for set-color request
-  myLight.onSetColorTemperature(onSetColorTemperature); // set callback for set-color-temperature request
-  myLight.onIncreaseColorTemperature(onIncreaseColorTemperature); // set callback for increase-color-temperature request
-  myLight.onDecreaseColorTemperature(onDecreaseColorTemperature); // set callback for decrease-color-temperature request
+  SinricPro[LIGHT_ID].onPowerState(onPowerState);             // automatic create device and set callback routine for on/off request
+  SinricPro[LIGHT_ID].onSetBrightness(onSetBrightness);       // set callback for power-level request
+  SinricPro[LIGHT_ID].onAdjustBrightness(onAdjustBrightness); // set callback for adjust-brightness request
+  SinricPro[LIGHT_ID].onSetColor(onSetColor);                 // set callback for set-color request
+  SinricPro[LIGHT_ID].onSetColorTemperature(onSetColorTemperature); // set callback for set-color-temperature request
+  SinricPro[LIGHT_ID].onIncreaseColorTemperature(onIncreaseColorTemperature); // set callback for increase-color-temperature request
+  SinricPro[LIGHT_ID].onDecreaseColorTemperature(onDecreaseColorTemperature); // set callback for decrease-color-temperature request
   SinricPro.begin(API_KEY);                   // start SinricPro
 }
 
