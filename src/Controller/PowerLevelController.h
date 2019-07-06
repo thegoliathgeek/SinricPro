@@ -19,9 +19,10 @@ public:
   void onAdjustPowerLevel(PowerLevelCallback callback) { _powerLevelAdjustCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+  bool raiseEvent(JsonDocument& jsonEvent);
 
   void setPowerLevelState(powerLevelState& state) { _powerLevelState = state; }
-  powerLevelState getPowerLevelState() { return _powerLevelState; }
+  powerLevelState& getPowerLevelState() { return _powerLevelState; }
 private:
   PowerLevelCallback _powerLevelCb;
   PowerLevelCallback _powerLevelAdjustCb;
@@ -55,6 +56,11 @@ bool PowerLevelController::handle(JsonDocument& jsonRequest, JsonDocument& jsonR
   if (success) _powerLevelState = tempState;
   jsonResponse["value"]["powerLevel"] = _powerLevelState.powerLevel;
   return success;
+}
+
+bool PowerLevelController::raiseEvent(JsonDocument& jsonEvent) {
+  jsonEvent["value"]["powerLevel"] = _powerLevelState.powerLevel;
+  return true;
 }
 
 #endif

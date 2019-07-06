@@ -19,9 +19,10 @@ public:
   void onAdjustBrightness(BrightnessLevelCallback callback) { _brightnessAdjustCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+  bool raiseEvent(JsonDocument& jsonEvent);
 
   void setBrightnessState(brightnessState& state) { _brightnessState = state; }
-  brightnessState getBrightnessState() { return _brightnessState; }
+  brightnessState& getBrightnessState() { return _brightnessState; }
 private:
   BrightnessLevelCallback _brightnessLevelCb;
   BrightnessLevelCallback _brightnessAdjustCb;
@@ -58,5 +59,12 @@ bool BrightnessController::handle(JsonDocument& jsonRequest, JsonDocument& jsonR
   jsonResponse["value"]["brightness"] = _brightnessState.brightness;
   return success;
 }
+
+bool BrightnessController::raiseEvent(JsonDocument& jsonEvent) {
+  jsonEvent["value"]["brightness"] = _brightnessState.brightness;
+  return true;
+}
+
+
 
 #endif

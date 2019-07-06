@@ -25,9 +25,10 @@ public:
   void onDecreaseColorTemperature(ColorTemperatureCallback callback) { _decColorTempCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+  bool raiseEvent(JsonDocument& jsonEvent);
 
   void setColorTemperatureState(colorTemperatureState& state) { _colorTemperatureState = state; }
-  colorTemperatureState getColorTemperatureState() { return _colorTemperatureState; }
+  colorTemperatureState& getColorTemperatureState() { return _colorTemperatureState; }
 private:
   ColorTemperatureCallback _colorTempCb;
   ColorTemperatureCallback _incColorTempCb;
@@ -63,6 +64,11 @@ bool ColorTemperatureController::handle(JsonDocument& jsonRequest, JsonDocument&
   if (success) _colorTemperatureState = tempState;
   jsonResponse["value"]["colorTemperature"] = _colorTemperatureState.colorTemperature;
   return success;
+}
+
+bool ColorTemperatureController::raiseEvent(JsonDocument& jsonEvent) {
+  jsonEvent["value"]["colorTemperature"] = _colorTemperatureState.colorTemperature;
+  return true;
 }
 
 #endif

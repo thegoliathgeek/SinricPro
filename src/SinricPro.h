@@ -42,7 +42,7 @@ class SinricPro {
     unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
     void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
-    void raiseEvent(SinricProEvent& event);
+    void raiseEvent(const char* deviceId, const char* action, const char* cause);
 //    SinricProDevice& operator[] (int index)  { return *devices[index]; } removed for security reasons
     SinricProDevice& operator[] (const char* deviceId);
     SinricProDevice& operator[] (const String& deviceId);
@@ -223,12 +223,32 @@ boolean SinricPro::remove(const char* deviceId) {
 boolean SinricPro::remove(const String& deviceId) {
   return remove(deviceId.c_str());
 }
-
+/*
 void SinricPro::raiseEvent(SinricProEvent& event) {
   event.setTS(getTimestamp());
   String tmpString = event.getJsonEventString();
   DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
   _websocketListener.sendEvent(tmpString);
+}
+*/
+
+void SinricPro::raiseEvent(const char* deviceId, const char* action, const char* type = "PHYSICAL_INTERACTION") {
+  DynamicJsonDocument jsonEvent(512);
+  jsonEvent["payloadVersion"] = 1;
+  jsonEvent["createdAt"] = getTimestamp();
+  jsonEvent["deviceId"] = deviceId;
+  jsonEvent["type"] = "event";
+  jsonEvent["action"] = action;
+  jsonEvent.createNestedObject("value");
+  jsonEvent.createNestedObject("cause");
+  jsonEvent["cause"]["type"] = type;
+
+  getDevice(deviceId, false)->raiseEvent(jsonEvent);
+
+  String jsonEventStr;
+  serializeJsonPretty(jsonEvent, jsonEventStr);
+  DEBUG_SINRIC("[SinricPro.raiseEvent()]:\r\n%s\r\n", jsonEventStr.c_str());
+  _websocketListener.sendEvent(jsonEventStr);
 }
 
 #ifndef SINRIC_NOINSTANCE

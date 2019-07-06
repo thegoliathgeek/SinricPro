@@ -22,9 +22,10 @@ public:
   void onPowerState(PowerStateCallback callback) { _powerStateCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+  bool raiseEvent(JsonDocument& jsonEvent);
 
   void setPowerState(powerState& state) { _powerState = state; }
-  powerState getPowerState() { return _powerState; }
+  powerState& getPowerState() { return _powerState; }
 private:
   PowerStateCallback _powerStateCb;
 
@@ -51,6 +52,12 @@ bool PowerController::handle(JsonDocument& jsonRequest, JsonDocument& jsonRespon
   if (success) _powerState = tempState;
   jsonResponse["value"]["state"] = _powerState.state?"On":"Off";
   return success;
+}
+
+bool PowerController::raiseEvent(JsonDocument& jsonEvent) {
+  // jsonEvent is prefilled by SinricPro.raiseEvent
+  jsonEvent["value"]["state"] = _powerState.state?"On":"Off";
+  return true;
 }
 
 #endif

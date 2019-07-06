@@ -23,9 +23,10 @@ public:
   void onSetColor(ColorCallback callback) { _colorCb = callback; }
 
   bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+  bool raiseEvent(JsonDocument& jsonEvent);
 
   void setColorState(colorState& state) { _colorState = state; }
-  colorState getColorState() { return _colorState; }
+  colorState& getColorState() { return _colorState; }
 private:
   ColorCallback _colorCb;
 
@@ -54,6 +55,14 @@ bool ColorController::handle(JsonDocument& jsonRequest, JsonDocument& jsonRespon
   jsonResponse["value"]["color"]["g"] = _colorState.g;
   jsonResponse["value"]["color"]["b"] = _colorState.b;
   return success;
+}
+
+bool ColorController::raiseEvent(JsonDocument& jsonEvent) {
+  jsonEvent["value"].createNestedObject("color");
+  jsonEvent["value"]["color"]["r"] = _colorState.r;
+  jsonEvent["value"]["color"]["g"] = _colorState.g;
+  jsonEvent["value"]["color"]["b"] = _colorState.b;
+  return true;
 }
 
 #endif

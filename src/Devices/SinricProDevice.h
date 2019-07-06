@@ -3,6 +3,7 @@
 
 #include <ArduinoJson.h>
 #include "Request/SinricProRequest.h"
+#include "Events/SinricProEvent.h"
 #include "Controller/ColorController.h"
 #include "Controller/ColorTemperatureController.h"
 #include "Controller/BrightnessController.h"
@@ -18,6 +19,7 @@ class SinricProDevice : public PowerController,
     SinricProDevice(const char* deviceId);
     ~SinricProDevice();
     bool handle(JsonDocument& jsonRequest, JsonDocument& jsonResponse);
+    bool raiseEvent(JsonDocument& jsonEvent);
     const char* getDeviceId() { return _deviceId; }
   protected:
     char* _deviceId;
@@ -43,7 +45,19 @@ bool SinricProDevice::handle(JsonDocument& jsonRequest, JsonDocument& jsonRespon
   if (compare(actionName, "setColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "increaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
   if (compare(actionName, "decreaseColorTemperature")) return ColorTemperatureController::handle(jsonRequest, jsonResponse);
-  return false; // should only happen if no controller can handle it...
+  return false; // should only happen if no controller can handle request.
+}
+
+bool SinricProDevice::raiseEvent(JsonDocument& jsonEvent) {
+  const char* actionName = jsonEvent["action"];
+
+  if (compare(actionName, POWERSTATE_EVENT)) return PowerController::raiseEvent(jsonEvent);
+  if (compare(actionName, POWERLEVEL_EVENT)) return PowerLevelController::raiseEvent(jsonEvent);
+  if (compare(actionName, BRIGHTNESS_EVENT)) return BrightnessController::raiseEvent(jsonEvent);
+  if (compare(actionName, COLOR_EVENT)) return ColorController::raiseEvent(jsonEvent);
+  if (compare(actionName, COLORTEMPERATURE_EVENT)) return ColorTemperatureController::raiseEvent(jsonEvent);
+
+  return false; // should only happen if controller cant handle event.
 }
 
 SinricProDevice::SinricProDevice(const char* deviceId) {
