@@ -96,6 +96,8 @@ void SinricPro::prepareResponse(const JsonDocument& jsonRequest, JsonDocument& j
   jsonResponse["success"] = false;
   jsonResponse["message"] = "OK";
   jsonResponse["createdAt"] = createdAt;
+  jsonResponse["clientId"] = jsonRequest["clientId"];
+  jsonResponse["messageId"] = jsonRequest["messageId"];
   jsonResponse["deviceId"] = jsonRequest["deviceId"];
   jsonResponse["type"] = "response";
   jsonResponse["action"] = jsonRequest["action"];
