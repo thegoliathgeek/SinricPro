@@ -13,10 +13,11 @@
 #include "Communication/SinricProWebsocket.h"
 #include "Communication/SinricProUDP.h"
 #include "Request/SinricProRequest.h"
-#include "Events/SinricProEvent.h"
+//#include "Events/SinricProEvent.h"
 
 class SinricPro {
   public:
+    typedef std::vector<SinricProDevice*> SinricProDeviceList;
     SinricPro();
     ~SinricPro();
 
@@ -47,8 +48,8 @@ class SinricPro {
     SinricProDevice& operator[] (const char* deviceId);
     SinricProDevice& operator[] (const String& deviceId);
 
-    std::vector<SinricProDevice*>::iterator begin() { return devices.begin(); }
-    std::vector<SinricProDevice*>::iterator end() { return devices.end(); }
+    SinricProDeviceList::iterator begin() { return devices.begin(); }
+    SinricProDeviceList::iterator end() { return devices.end(); }
     int size() { return devices.size(); }
 
   private:
@@ -57,7 +58,7 @@ class SinricPro {
 
     websocketListener _websocketListener;
     udpListener _udpListener;
-    std::vector<SinricProDevice*> devices;
+    SinricProDeviceList devices;
     unsigned long _baseTS;
 };
 
@@ -223,14 +224,6 @@ boolean SinricPro::remove(const char* deviceId) {
 boolean SinricPro::remove(const String& deviceId) {
   return remove(deviceId.c_str());
 }
-/*
-void SinricPro::raiseEvent(SinricProEvent& event) {
-  event.setTS(getTimestamp());
-  String tmpString = event.getJsonEventString();
-  DEBUG_SINRIC("[SinricPro:raiseEvent]: \r\n%s\r\n", tmpString.c_str());
-  _websocketListener.sendEvent(tmpString);
-}
-*/
 
 void SinricPro::raiseEvent(const char* deviceId, const char* action, const char* type = "PHYSICAL_INTERACTION") {
   DynamicJsonDocument jsonEvent(512);
@@ -243,12 +236,19 @@ void SinricPro::raiseEvent(const char* deviceId, const char* action, const char*
   jsonEvent.createNestedObject("cause");
   jsonEvent["cause"]["type"] = type;
 
-  getDevice(deviceId, false)->raiseEvent(jsonEvent);
-
-  String jsonEventStr;
-  serializeJsonPretty(jsonEvent, jsonEventStr);
-  DEBUG_SINRIC("[SinricPro.raiseEvent()]:\r\n%s\r\n", jsonEventStr.c_str());
-  _websocketListener.sendEvent(jsonEventStr);
+  SinricProDevice* device = getDevice(deviceId, false);
+  if (device) {
+    if (device->raiseEvent(jsonEvent)) {
+      String jsonEventStr;
+      serializeJsonPretty(jsonEvent, jsonEventStr);
+      DEBUG_SINRIC("[SinricPro.raiseEvent()]:\r\n%s\r\n", jsonEventStr.c_str());
+      _websocketListener.sendEvent(jsonEventStr);
+    } else {
+      DEBUG_SINRIC("Event %s not allowed!\r\n", action);
+    }
+  } else {
+    DEBUG_SINRIC("Device %s doesn't exist!\r\n", deviceId);
+  }
 }
 
 #ifndef SINRIC_NOINSTANCE
