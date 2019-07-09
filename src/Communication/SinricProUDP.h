@@ -2,7 +2,7 @@
 #define __SINRIC_PRO_UDP_H__
 
 #include <ESP8266WiFi.h>
-#include <WiFiUDP.h>
+#include <WiFiUdp.h>
 #include <Request/SinricProRequest.h>
 #include <Communication/SinricProQueue.h>
 
