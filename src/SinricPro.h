@@ -12,6 +12,7 @@
 #include "Communication/SinricProQueue.h"
 #include "Communication/SinricProWebsocket.h"
 #include "Communication/SinricProUDP.h"
+#include "Communication/NTP.h"
 #include "Request/SinricProRequest.h"
 //#include "Events/SinricProEvent.h"
 
@@ -40,8 +41,10 @@ class SinricPro {
     boolean remove(const char* deviceId);
     boolean remove(const String& deviceId);
 
-    unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
-    void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
+//    unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
+    unsigned long getTimestamp() { return _NTP.getTimestamp(); }
+
+//    void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
     void raiseEvent(const char* deviceId, const char* action, const char* cause);
 //    SinricProDevice& operator[] (int index)  { return *devices[index]; } removed for security reasons
@@ -60,6 +63,7 @@ class SinricPro {
     udpListener _udpListener;
     SinricProDeviceList devices;
     unsigned long _baseTS;
+    myNTP _NTP;
 };
 
 SinricPro::SinricPro() {};
@@ -85,6 +89,7 @@ void SinricPro::begin(const char* api_key) {
   }
   _websocketListener.begin(api_key, deviceIds.c_str());
   _udpListener.begin();
+  _NTP.begin();
 }
 
 void SinricPro::begin(const String& api_key) {
@@ -95,6 +100,7 @@ void SinricPro::handle() {
   _websocketListener.handle();
   _udpListener.handle();
   handleRequest();
+  _NTP.update();
 }
 
 void SinricPro::prepareResponse(const JsonDocument& jsonRequest, JsonDocument& jsonResponse, unsigned long createdAt) {
@@ -133,7 +139,7 @@ void SinricPro::handleRequest() {
       long createdAt = jsonRequest["createdAt"]; // 1562001822
       const char* deviceId = jsonRequest["deviceId"]; // "5d12df23eb7e894a699e0ae8"
 
-      syncTimestamp(createdAt);
+//      syncTimestamp(createdAt);
 
       SinricProDevice* device = getDevice(deviceId, false); // get device
 
