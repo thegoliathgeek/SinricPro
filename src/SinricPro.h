@@ -14,6 +14,7 @@
 #include "Communication/SinricProUDP.h"
 #include "Communication/NTP.h"
 #include "Request/SinricProRequest.h"
+#include "ESP8266TrueRandom.h"
 //#include "Events/SinricProEvent.h"
 
 class SinricPro {
@@ -43,6 +44,7 @@ class SinricPro {
 
 //    unsigned long getTimestamp() { return _baseTS + (millis() / 1000); }
     unsigned long getTimestamp() { return _NTP.getTimestamp(); }
+    String getUUID();
 
 //    void syncTimestamp(unsigned long ts) { _baseTS = ts-(millis()/1000); }
 
@@ -107,7 +109,7 @@ void SinricPro::prepareResponse(const JsonDocument& jsonRequest, JsonDocument& j
   jsonResponse["payloadVersion"] = 1;
   jsonResponse["success"] = false;
   jsonResponse["message"] = "OK";
-  jsonResponse["createdAt"] = createdAt;
+  jsonResponse["createdAt"] = getTimestamp();
   jsonResponse["clientId"] = jsonRequest["clientId"];
   jsonResponse["messageId"] = jsonRequest["messageId"];
   jsonResponse["deviceId"] = jsonRequest["deviceId"];
@@ -136,7 +138,7 @@ void SinricPro::handleRequest() {
       serializeJsonPretty(jsonRequest, jsonRequestPretty);
       DEBUG_SINRIC("[SinricPro.handleRequest()]: request:\r\n%s\r\n",jsonRequestPretty.c_str());
 
-      long createdAt = jsonRequest["createdAt"]; // 1562001822
+//      long createdAt = jsonRequest["createdAt"]; // 1562001822
       const char* deviceId = jsonRequest["deviceId"]; // "5d12df23eb7e894a699e0ae8"
 
 //      syncTimestamp(createdAt);
@@ -231,10 +233,17 @@ boolean SinricPro::remove(const String& deviceId) {
   return remove(deviceId.c_str());
 }
 
+String SinricPro::getUUID() {
+  byte new_uuid[16];
+  ESP8266TrueRandom.uuid(new_uuid);
+  return ESP8266TrueRandom.uuidToString(new_uuid);
+}
+
 void SinricPro::raiseEvent(const char* deviceId, const char* action, const char* type = "PHYSICAL_INTERACTION") {
   DynamicJsonDocument jsonEvent(512);
   jsonEvent["payloadVersion"] = 1;
   jsonEvent["createdAt"] = getTimestamp();
+  jsonEvent["messageId"] = getUUID();
   jsonEvent["deviceId"] = deviceId;
   jsonEvent["type"] = "event";
   jsonEvent["action"] = action;

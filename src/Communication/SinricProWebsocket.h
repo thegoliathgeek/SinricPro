@@ -61,7 +61,7 @@ void websocketListener::begin(String apikey, String deviceIds) {
     webSocket.onEvent([&](WStype_t type, uint8_t * payload, size_t length) { webSocketEvent(type, payload, length); });
     webSocket.setAuthorization(apikey.c_str()); //
 
-    webSocket.setReconnectInterval(WEBSOCKET_CONNECTION_TIMEOUT);
+//    webSocket.setReconnectInterval(WEBSOCKET_CONNECTION_TIMEOUT);
     webSocket.enableHeartbeat(WEBSOCKET_PING_INTERVAL, WEBSOCKET_PING_TIMEOUT, WEBSOCKET_RETRY_COUNT);
 
 }
